@@ -242,20 +242,16 @@
     }
   })();
 
-  // ---- 丝线：完全笔直，白红交织、彼此 X 形交叉 ----
+  // ---- 丝线：纯白、自顶部居中垂下，近平行、略扇形张开（参照图：无红线、无交叉网）----
   // [顶部横杆锚点(×W*0.13), 系到字笔画上(×charW*0.46), 红色?]
   var MAP = [
-    [-1.00,  0.92, false],   // 左顶 → 右系（大交叉）
-    [-0.55,  0.55, false],
-    [-0.80, -0.30, true ],   // 红丝斜穿
-    [-0.30, -0.75, false],
-    [-0.15, -0.10, false],
-    [ 0.00,  0.00, false],   // 中垂
-    [ 0.20,  0.15, false],
-    [ 0.30,  0.75, false],
-    [ 0.80,  0.30, true ],   // 红丝斜穿
-    [ 0.55, -0.55, false],
-    [ 1.00, -0.92, false]    // 右顶 → 左系（大交叉）
+    [-0.45, -0.50, false],
+    [-0.28, -0.32, false],
+    [-0.13, -0.16, false],
+    [ 0.00,  0.00, false],
+    [ 0.13,  0.16, false],
+    [ 0.28,  0.32, false],
+    [ 0.45,  0.50, false]
   ];
   var strands = [];
   for(var m=0;m<MAP.length;m++){
@@ -270,13 +266,13 @@
   function drawRopes(alpha, ay, angRad){
     ctx.clearRect(0,0,W,H);
     if(alpha <= 0) return;
-    var cx = W*0.58, topY = H*0.012;
+    var cx = W*0.50, topY = H*0.012;
     var swing = Math.sin(angRad) * charW * 0.20;      // 钟摆横移
     // 顶部固定横杆（贴画面上缘）
     ctx.lineCap = 'butt';
     ctx.strokeStyle = 'rgba(245,243,238,'+(0.20*alpha).toFixed(3)+')';
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(cx - W*0.15, topY); ctx.lineTo(cx + W*0.15, topY); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx - W*0.09, topY); ctx.lineTo(cx + W*0.09, topY); ctx.stroke();
     // 笔直丝线（红线微微发光）
     ctx.lineCap = 'round';
     for(var s=0; s<strands.length; s++){
@@ -306,7 +302,7 @@
 
   // 减动效：静态构图后快速揭开
   if(reduce){
-    hen.style.transform = 'translateY(0) rotateZ(20deg) rotateY(-18deg) rotateX(8deg)';
+    hen.style.transform = 'translateY(0) rotateZ(28deg) rotateY(-18deg) rotateX(8deg)';
     drawRopes(1, henTop(), -18*Math.PI/180);
     beam.style.opacity = 1; halo.style.opacity = 1; spot.style.opacity = .9;
     ai.style.opacity = 1;
@@ -343,7 +339,7 @@
       ang = -18 + Math.sin(r2*2.2) * 2.5;
       rx  = 8 + Math.sin(r2*2.2) * 1.0;
     }
-    hen.style.transform = 'translateY('+ty.toFixed(1)+'px) rotateZ(20deg) rotateY('+ang.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
+    hen.style.transform = 'translateY('+ty.toFixed(1)+'px) rotateZ(28deg) rotateY('+ang.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
     drawRopes(1, ay0 + ty, ang * Math.PI/180);
 
     // 光：自上方缓缓打下（不再闪烁）—— 光束随强度下压、地面光池稍后亮起
