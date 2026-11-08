@@ -527,11 +527,11 @@ a{color:inherit;text-decoration:none;}
   position:absolute;left:47%;top:56%;z-index:6;
   font-family:'Ma Shan Zheng','Noto Serif SC',serif;
   font-size:clamp(98px,30vw,240px);line-height:1;
-  color:var(--red);
+  color:#3c0a10;
   transform-style:preserve-3d;
-  transform:rotateX(24deg) rotateZ(-6deg) scale(0.4);
-  text-shadow:0 0 10px rgba(224,16,34,.4),0 0 28px rgba(224,16,34,.2);
-  will-change:transform;
+  transform:rotateX(24deg) rotateZ(-6deg) scale(1);
+  text-shadow:0 0 14px rgba(224,16,34,.28);
+  will-change:transform,opacity;
 }
 .skip{
   position:absolute;right:18px;bottom:18px;z-index:7;opacity:.3;
