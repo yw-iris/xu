@@ -411,6 +411,27 @@ a{color:inherit;text-decoration:none;}
 .term-list li::before{content:"";position:absolute;left:0;top:.72em;width:5px;height:5px;background:var(--ink-faint);}
 .term-end{font-family:var(--serif);font-size:16px;letter-spacing:.2em;color:var(--ink-faint);text-align:center;margin-top:8px;}
 
+/* 详情页内嵌「须知」区块（与 profile.mini 同款分隔） */
+.terms-sec{margin-top:40px;padding-top:28px;border-top:1px solid var(--line);}
+.terms-sec .bodytext.terms{margin-top:0;}
+
+/* 外链卡片：话术 / 板评 / 卡面 → kdocs（红色扫入，呼应回主页按钮） */
+.doc-link{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  margin-top:26px;padding:16px 18px;border:1px solid var(--line);
+  font-family:var(--sans);text-decoration:none;color:var(--ink);
+  position:relative;overflow:hidden;transition:.35s var(--ease);
+}
+.doc-link::before{content:"";position:absolute;inset:0;background:var(--red);transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease);z-index:0;}
+.doc-link:hover::before{transform:scaleX(1);}
+.doc-link:hover{border-color:var(--red);}
+.doc-link>*{position:relative;z-index:1;transition:color .3s var(--ease);}
+.doc-link .lab{font-family:var(--cn);font-weight:700;font-size:15px;letter-spacing:.16em;}
+.doc-link .url{font-size:9px;letter-spacing:.18em;color:var(--ink-dim);text-transform:uppercase;white-space:nowrap;}
+.doc-link .ar{font-family:var(--display);font-weight:700;font-size:18px;color:var(--red);transition:transform .3s var(--ease),color .3s var(--ease);}
+.doc-link:hover .lab,.doc-link:hover .url{color:#fff;}
+.doc-link:hover .ar{color:#fff;transform:translateX(6px);}
+
 /* ============================================================
    开场动画 INTRO（立体）— 丝线交织红色 · 恨吊落 → 投影红「爱」
    ============================================================ */
