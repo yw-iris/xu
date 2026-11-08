@@ -400,10 +400,13 @@ a{color:inherit;text-decoration:none;}
    ============================================================ */
 .intro{position:fixed;inset:0;z-index:9999;background:#000;overflow:hidden;transition:opacity .9s ease;}
 .intro.gone{opacity:0;pointer-events:none;}
+/* 暗角：字悬浮于黑暗，边缘渐隐入黑 */
+.intro::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:4;
+  background:radial-gradient(ellipse 75% 70% at 50% 42%, transparent 55%, rgba(0,0,0,.85) 100%);}
 
 /* 透视舞台：整体微微后仰，制造立体纵深 */
 .scene{position:absolute;inset:0;perspective:1100px;perspective-origin:50% 36%;}
-.stage{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(13deg);}
+.stage{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(10deg);}
 
 #ropes{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;}
 .spot{
