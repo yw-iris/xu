@@ -199,7 +199,7 @@
 (function(){
   var intro = document.getElementById('intro');
   if(!intro) return;
-  var KEY = 'xu_intro_v1';
+  var KEY = 'xu_intro_v2';
   var force = /[?&]intro\b/.test(location.search);
   if(!force && sessionStorage.getItem(KEY)){ intro.parentNode.removeChild(intro); return; }
 
@@ -222,22 +222,24 @@
   size();
   addEventListener('resize', size);
 
-  // 时间线 (ms)
-  var SWING=1600, FALL=1150, AIIN=1000, HOLD=800;
-  var fallEnd = SWING+FALL;          // 2750
-  var aiStart = fallEnd;             // 2750
-  var total   = aiStart+AIIN+HOLD;   // 4550
+  // 时间线 (ms)：下放 → 悬晃 → 坠落 → 「爱」投影
+  var DESCEND=1500, SWING=900, FALL=1100, AIIN=1000, HOLD=800;
+  var swingEnd = DESCEND+SWING;       // 2400
+  var fallEnd  = swingEnd+FALL;       // 3500
+  var aiStart  = fallEnd;             // 3500
+  var total    = aiStart+AIIN+HOLD;   // 5300
 
-  // ---- 立体字：「恨」多层沿 Z 轴堆叠挤出（正面亮白 → 背面渐暗）----
-  var charW = 120;
+  // ---- 立体字：「恨」多层沿 Z 轴堆叠挤出（正面亮白 → 侧面浅灰），厚度随字号自适应 ----
+  var charW = 60;
   function measure(){
     var fs = parseFloat(getComputedStyle(hen).fontSize);
-    charW = Math.max(88, (fs || 120) * 1.04);
+    charW = (fs || 60) * 1.04;
   }
   measure(); addEventListener('resize', measure);
 
   (function buildLayers(){
-    var LAYERS = 30, GAP = 2.3;
+    var hfs = parseFloat(getComputedStyle(hen).fontSize) || 60;
+    var LAYERS = 18, GAP = Math.max(1.0, hfs * 0.030);
     var txt = (hen.textContent || '恨').trim();
     hen.textContent = '';
     for(var i=0;i<LAYERS;i++){
@@ -245,16 +247,17 @@
       d.className = 'xl';
       d.textContent = txt;
       var t = i/(LAYERS-1);                          // 0 正面 → 1 背面
-      var r = Math.round(255-130*t), g = Math.round(254-132*t), b = Math.round(250-135*t);
+      var r = Math.round(255-160*t), g = Math.round(254-162*t), b = Math.round(250-165*t);
       d.style.color = 'rgb('+r+','+g+','+b+')';      // 正面纯白 → 侧面浅灰（参照图）
       d.style.transform = 'translate(-50%,0) translateZ('+(-i*GAP).toFixed(2)+'px)';
-      if(i===0) d.style.textShadow = '0 0 16px rgba(255,255,255,.22)';
+      if(i===0) d.style.textShadow = '0 0 10px rgba(255,255,255,.18)';
       hen.appendChild(d);
     }
     // 「爱」同样立体挤出：红正面 → 暗红侧面
+    var afs = parseFloat(getComputedStyle(ai).fontSize) || 55;
     var atxt = (ai.textContent || '爱').trim();
     ai.textContent = '';
-    var AL = 22, AGAP = 2.0;
+    var AL = 16, AGAP = Math.max(1.0, afs * 0.028);
     for(var j=0;j<AL;j++){
       var e = document.createElement('div');
       e.className = 'xl';
@@ -263,7 +266,7 @@
       var cr = Math.round(228-146*u), cg = Math.round(18-8*u), cb = Math.round(36-16*u);
       e.style.color = 'rgb('+cr+','+Math.max(0,cg)+','+Math.max(0,cb)+')';
       e.style.transform = 'translate(-50%,-50%) translateZ('+(-j*AGAP).toFixed(2)+'px)';
-      if(j===0) e.style.textShadow = '0 0 34px rgba(224,16,34,.75),0 0 90px rgba(224,16,34,.4)';
+      if(j===0) e.style.textShadow = '0 0 8px rgba(224,16,34,.6),0 0 24px rgba(224,16,34,.35)';
       ai.appendChild(e);
     }
   })();
@@ -289,14 +292,16 @@
   }
 
   function henTop(){ return H * 0.30; }
+  // 下放起点：字完全隐没在视口上方（看不到的上面）
+  function startY(){ return -(henTop() + charW*1.6); }
 
   // 绘制丝线：顶部固定横杆 + 笔直细线交叉，系点扎进「恨」上沿笔画
   function drawRopes(alpha, ay, angRad){
     ctx.clearRect(0,0,W,H);
     if(alpha <= 0) return;
-    var cx = W/2, topY = H*0.035;
+    var cx = W/2, topY = H*0.012;
     var swing = Math.sin(angRad) * charW * 0.20;      // 钟摆横移
-    // 顶部固定横杆
+    // 顶部固定横杆（贴画面上缘）
     ctx.lineCap = 'butt';
     ctx.strokeStyle = 'rgba(245,243,238,'+(0.20*alpha).toFixed(3)+')';
     ctx.lineWidth = 1;
@@ -330,8 +335,8 @@
 
   // 减动效：静态构图后快速揭开
   if(reduce){
-    hen.style.transform = 'translateY(0) rotateZ(-6deg) rotateY(-15deg) rotateX(5deg)';
-    drawRopes(1, henTop(), -15*Math.PI/180);
+    hen.style.transform = 'translateY(0) rotateZ(-6deg) rotateY(-18deg) rotateX(8deg)';
+    drawRopes(1, henTop(), -18*Math.PI/180);
     ai.style.opacity = 1; spot.style.opacity = .9;
     ai.style.transform = 'rotateX(48deg) scale(1)';
     setTimeout(finish, 1400);
@@ -346,19 +351,28 @@
     var cx = W/2, ay0 = henTop();
     var ty = 0, ang = 0, rx = 0, ropeAlpha = 1;
 
-    if(el < SWING){
-      var p = el/SWING;
-      ang = -15 + Math.sin(el/1000 * 2.4) * 6 * (1 - p*0.25);  // 带基础偏转的 3D 钟摆（露出侧面厚度）
-      rx  = 5 + Math.sin(el/1000 * 2.4) * 2.5;
+    if(el < DESCEND){
+      // 「恨」被丝线从看不见的上方缓缓放下（减速入库），带轻微摆动
+      var p = el/DESCEND;
+      var e = 1 - Math.pow(1-p, 3);
+      ty  = startY() * (1-e);
+      ang = -18 + Math.sin(p*6.28) * 4 * (1-p);
+      rx  = 8 + Math.sin(p*6.28+1) * 1.5;
+    } else if(el < swingEnd){
+      // 悬晃：带基础偏转的 3D 钟摆（露出侧面厚度）
+      var q = (el-DESCEND)/SWING;
+      ty  = 0;
+      ang = -18 + Math.sin(q*6.8) * 6 * (1-q*0.45);
+      rx  = 8 + Math.sin(q*6.8) * 2.5;
     } else if(el < fallEnd){
-      var f = (el - SWING)/FALL;                         // 0..1
-      var e = f*f;                                       // 重力加速
-      ty  = e * (H*0.98);
-      ang = -9 + f*38;                                   // 坠落翻滚
-      rx  = 5 + f*40;
-      ropeAlpha = Math.max(0, 1 - f*7);                  // 丝线骤断
+      var f = (el-swingEnd)/FALL;                      // 0..1
+      var e2 = f*f;                                    // 重力加速
+      ty  = e2 * (H*0.98);
+      ang = -12 + f*40;                                // 坠落翻滚
+      rx  = 8 + f*38;
+      ropeAlpha = Math.max(0, 1 - f*7);                // 丝线骤断
     } else {
-      ty = H*0.98; ang = 29; rx = 45; ropeAlpha = 0;
+      ty = H*0.98; ang = 28; rx = 46; ropeAlpha = 0;
     }
     hen.style.transform = 'translateY('+ty.toFixed(1)+'px) rotateZ(-6deg) rotateY('+ang.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
     drawRopes(ropeAlpha, ay0 + ty, ang * Math.PI/180);
@@ -375,8 +389,8 @@
   }
   requestAnimationFrame(frame);
 
-  // 兜底：若 rAF 异常，5.6s 后强制揭开
-  setTimeout(finish, 5600);
+  // 兜底：若 rAF 异常，强制揭开
+  setTimeout(finish, 6800);
 })();
 </script>
 
