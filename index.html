@@ -244,7 +244,7 @@
   // ---- 立体字：「爱」同样多层沿 Z 轴挤出（红正面 → 暗红侧面），与「恨」统一立体风格 ----
   (function buildAi(){
     var afs = parseFloat(getComputedStyle(ai).fontSize) || 60;
-    var LAYERS = 22, GAP = Math.max(1.0, afs*0.040);
+    var LAYERS = 16, GAP = Math.max(1.0, afs*0.028);
     var txt = (ai.textContent || '爱').trim();
     ai.textContent = '';
     for(var j=0;j<LAYERS;j++){
@@ -372,13 +372,16 @@
     halo.style.opacity = L.toFixed(3);
     spot.style.opacity = (spotL*0.92).toFixed(3);
 
-    // 红「爱」：从光池里由小放大浮现（保持 opacity=1 不破坏 3D 挤出）
+    // 红「爱」：从光池里由小放大浮现 + 持续轻微悬浮摆动（与恨字统一节奏）
     if(el > shadowStart){
       var a = Math.min(1, (el - shadowStart)/SHADOW);
       var ease = 1 - Math.pow(1-a, 2.2);
       var s = 0.4 + 0.6*ease;                 // 0.4 → 1.0
       var dy = -22 * (1-ease);
-      ai.style.transform = 'rotateX(24deg) rotateZ(-6deg) scale('+s.toFixed(3)+') translateY('+dy.toFixed(1)+'px)';
+      var ph = (el - shadowStart)/1000;
+      var az = -6 + Math.sin(ph*2.2 + 0.6) * 2.5;   // 绕 Z 轻摆（露出侧面厚度）
+      var ax = 24 + Math.sin(ph*2.2 + 1.3) * 1.0;   // 绕 X 轻摆
+      ai.style.transform = 'rotateX('+ax.toFixed(2)+'deg) rotateZ('+az.toFixed(2)+'deg) scale('+s.toFixed(3)+') translateY('+dy.toFixed(1)+'px)';
     }
 
     if(el > total){ finish(); return; }
