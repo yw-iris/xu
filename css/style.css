@@ -279,7 +279,6 @@ a{color:inherit;text-decoration:none;}
 .stage .bigart{height:320px;display:flex;align-items:center;justify-content:center;transition:transform .6s var(--ease);}
 .stage .bigart img{width:100%;height:100%;object-fit:cover;filter:grayscale(.12) contrast(1.05) brightness(.94);}
 .stage:hover .bigart{transform:scale(1.03);}
-.stage .drip{position:absolute;width:13px;height:26px;opacity:.92;pointer-events:none;z-index:1;filter:drop-shadow(0 0 6px var(--red-glow));}
 
 .bodytext{max-width:580px;margin:36px auto 0;font-family:var(--serif);}
 .bodytext p{font-size:clamp(15px,4vw,19px);line-height:2.05;letter-spacing:.04em;margin-bottom:1.1em;color:var(--ink);}
@@ -304,6 +303,39 @@ a{color:inherit;text-decoration:none;}
 .home-cta .cta:hover .t{color:#fff;}
 .home-cta .cta:hover .ar{color:#fff;transform:translateX(6px);}
 .home-cta .hint{font-family:var(--sans);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);margin-top:14px;}
+
+/* ============ DETAIL PAGE — black-red swirl backdrop + water ripple ============ */
+.wrap.detail{position:relative;z-index:3;padding-top:4px;overflow:hidden;}
+.detail-bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:#08080a;}
+.detail-bg img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  filter:grayscale(1) brightness(.42) contrast(1.12);opacity:.55;mix-blend-mode:luminosity;
+}
+.detail-bg::after{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(120% 70% at 50% -10%, rgba(196,22,32,.34), transparent 58%),
+    linear-gradient(180deg, rgba(8,8,10,.50), rgba(8,8,10,.80));
+}
+.detail-bg .ripple{position:absolute;inset:0;width:100%;height:100%;}
+.detail > *:not(.detail-bg){position:relative;z-index:1;}
+/* keep text legible over the moving water */
+.detail .bodytext p{text-shadow:0 1px 16px rgba(0,0,0,.6);}
+.detail .head .no{font-size:clamp(24px,6.4vw,32px);}
+.detail .head h2{font-size:clamp(54px,15vw,90px);}
+.detail .head .en{letter-spacing:.32em;color:var(--ink-dim);}
+/* refined fragment kicker on detail heads */
+.detail .kicker{display:flex;margin-bottom:14px;font-family:var(--sans);font-weight:600;font-size:9px;letter-spacing:.34em;text-transform:uppercase;color:var(--ink-faint);}
+.detail .kicker::before{content:"";width:16px;height:1px;background:var(--red);display:inline-block;margin:auto 9px auto 0;}
+.detail .kicker .n{color:var(--red);font-variant-numeric:tabular-nums;}
+/* soft scrim under text blocks for premium legibility */
+.detail .profile.mini,
+.detail .terms-sec,
+.detail .home-cta{background:linear-gradient(180deg, rgba(10,10,12,.34), rgba(10,10,12,.22));border-radius:6px;}
+.detail .profile.mini{padding:24px 16px 4px;}
+.detail .terms-sec{padding:24px 16px 4px;}
+.detail .home-cta{padding:26px 16px 6px;margin-top:40px;}
+.detail .sec-title{margin-left:0;}
 /* 静态章节标签（详情页 pills 为 span，不可点） */
 .topbar span.pill.on{pointer-events:none;cursor:default;}
 
@@ -335,8 +367,23 @@ a{color:inherit;text-decoration:none;}
 }
 .doc-meta{
   margin-top:10px;font-family:var(--sans);font-weight:600;font-size:8px;
-  letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);
+  letter-spacing:.26em;text-transform:uppercase;color:var(--ink-dim);
 }
+
+/* editorial kicker (ref: BETWEEN US — numbered sections / hairline rules) */
+.kicker{
+  display:inline-flex;align-items:center;gap:9px;
+  font-family:var(--sans);font-weight:600;font-size:9px;letter-spacing:.34em;
+  text-transform:uppercase;color:var(--ink-faint);
+}
+.kicker::before{content:"";width:16px;height:1px;background:var(--red);display:inline-block;}
+.kicker .n{color:var(--red);font-variant-numeric:tabular-nums;}
+.doc{margin-top:22px;}
+.doc::before{
+  content:"";display:block;width:48px;height:1px;margin:0 auto 18px;
+  background:linear-gradient(90deg,transparent,var(--line) 40%,var(--line) 60%,transparent);
+}
+.sin-keys{letter-spacing:.42em;color:var(--ink-dim);}
 
 /* ---- opener / 引言 ---- */
 .opener{
@@ -393,11 +440,9 @@ a{color:inherit;text-decoration:none;}
 .sin-keys{display:flex;justify-content:space-around;margin-top:18px;font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.2em;color:var(--ink-faint);}
 .sins-fig{margin:22px 0 2px;position:relative;z-index:3;}
 .sins-fig img{
-  display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:3px;
+  display:block;width:100%;height:auto;border:none;border-radius:3px;
   filter:saturate(.92) contrast(1.04);
-  box-shadow:0 22px 54px -30px rgba(0,0,0,.95), 0 0 0 1px rgba(224,16,34,.10) inset;
 }
-.sins-fig::after{content:"";position:absolute;left:0;top:0;width:26px;height:2px;background:var(--red);}
 
 /* ---- end ---- */
 .end{position:relative;z-index:3;text-align:center;margin:46px auto 8px;font-family:var(--serif);font-size:clamp(15px,4.2vw,20px);line-height:2;letter-spacing:.08em;color:var(--ink-dim);}
