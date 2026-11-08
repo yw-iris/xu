@@ -251,11 +251,19 @@
   size();
   addEventListener('resize', size);
 
-  // 时间线 (ms)：下放 → 悬晃 → 灯亮(闪烁) → 红「爱」阴影浮现 → 停留
-  var DESCEND=1500, SWING=900, LIGHT=1100, SHADOW=1200, HOLD=1000;
-  var swayEnd    = DESCEND+SWING;         // 2400
-  var shadowStart= swayEnd+LIGHT;         // 3100
-  var total      = shadowStart+SHADOW+HOLD; // 5300
+  // 时间线 (ms)：红线淡入(伴随恨字) → 灯亮 → 红「爱」阴影浮现 → 停留
+  // 不再有“恨”被丝线吊落的下放/悬晃动画；恨字静止于最终姿态，
+  // 9 条丝线自画面上缘垂下，末端严格系于「恨」字顶缘（逐条贴合、轻扎入）。
+  var ROPE_IN = 650, LIGHT = 1100, SHADOW = 1300, HOLD = 1500;
+  var lightStart  = 250;
+  var shadowStart = lightStart + LIGHT;            // 1350
+  var total = shadowStart + SHADOW + HOLD;         // ~4150
+
+  // 恨字静止姿态（与丝线连接点标定一致）
+  var REST_Z = -20, REST_Y = 12, REST_X = 8;
+  function restTransform(){
+    return 'translateY(0px) rotateZ('+REST_Z+'deg) rotateY('+REST_Y+'deg) rotateX('+REST_X+'deg)';
+  }
 
   // ---- 立体字：「恨」多层沿 Z 轴堆叠挤出（正面亮白 → 侧面浅灰），厚度随字号自适应 ----
   var charW = 60;
@@ -295,24 +303,20 @@
   //      自画面上缘直接垂下（无横杆）、亮白、最左两条更长垂到字左下方 ----
   // [顶端x(×W), 末端x(×W), 额外加长px, 末端y(%H)] —— 末端y 贴合该处「恨」字顶缘+轻扎入
   var MAP = [
-    [-0.119, -0.109,   0, 0.354],
-    [-0.093, -0.083,   0, 0.352],
-    [-0.070, -0.059,   0, 0.300],
-    [-0.055, -0.045,   0, 0.293],
-    [-0.016, -0.001,   0, 0.274],
-    [-0.001,  0.013,   0, 0.273],
-    [ 0.029,  0.041,   0, 0.388],
-    [ 0.041,  0.055,   0, 0.358],
-    [ 0.119,  0.128,   0, 0.416]
+    [-0.119, -0.109,   0, 0.310],
+    [-0.093, -0.083,   0, 0.274],
+    [-0.070, -0.059,   0, 0.268],
+    [-0.055, -0.045,   0, 0.262],
+    [-0.016, -0.001,   0, 0.259],
+    [-0.001,  0.013,   0, 0.260],
+    [ 0.029,  0.041,   0, 0.309],
+    [ 0.041,  0.055,   0, 0.309],
+    [ 0.119,  0.128,   0, 0.352]
   ];
   var strands = [];
   for(var m=0;m<MAP.length;m++){
     strands.push({topX:MAP[m][0], botX:MAP[m][1], extra:MAP[m][2], ey:MAP[m][3]});
   }
-
-  function henTop(){ return H * 0.30; }
-  // 下放起点：字完全隐没在视口上方（看不到的上面）
-  function startY(){ return -(henTop() + charW*1.6); }
 
   // 绘制丝线：无横杆、近平行、微右漂；末端逐条贴合「恨」字顶缘（左「忄」左高右低、
   // 右「艮」左低右高的双峰结构），像参照图那样一缕缕系在字顶笔画上
@@ -344,10 +348,11 @@
   }
   if(skip) skip.addEventListener('click', finish);
 
-  // 减动效：静态构图后快速揭开
+  // 减动效：静态构图后快速揭开（同样不吊落，丝线严格系于恨顶缘）
   if(reduce){
-    hen.style.transform = 'translateY(0) rotateZ(-15deg) rotateY(12deg) rotateX(8deg)';
-    drawRopes(1, henTop(), 12*Math.PI/180);
+    hen.style.transform = restTransform();
+    hen.style.opacity = 1;
+    drawRopes(1, 0, REST_Y*Math.PI/180);
     beam.style.opacity = 1; halo.style.opacity = 1; spot.style.opacity = .9;
     ai.style.transform = 'translate(-50%,-50%) rotateX(54deg) rotateZ(-38deg) scale(1)';
     ai.style.opacity = 1;
@@ -355,42 +360,25 @@
     return;
   }
 
-  // 舞台灯：平滑曲线（无闪烁）
-
+  // 舞台灯：平滑曲线（无闪烁）；恨字静止、丝线自开场即系于其顶缘
   var T0 = null;
   function frame(now){
     if(done) return;
     if(T0 === null) T0 = now;
     var el = now - T0;
-    var ay0 = henTop();
-    var ty = 0, ang = 12, rx = 8;
 
-    if(el < DESCEND){
-      // 「恨」被丝线从看不见的上方缓缓放下（减速入库），带轻微摆动
-      var p = el/DESCEND;
-      var e = 1 - Math.pow(1-p, 3);
-      ty  = startY() * (1-e);
-      ang = 12 + Math.sin(p*6.28) * 4 * (1-p);
-      rx  = 8 + Math.sin(p*6.28+1) * 1.5;
-    } else if(el < swayEnd){
-      // 悬晃：带基础偏转的 3D 钟摆（露出侧面厚度）
-      var q = (el-DESCEND)/SWING;
-      ang = 12 + Math.sin(q*6.8) * 6 * (1-q*0.45);
-      rx  = 8 + Math.sin(q*6.8) * 2.5;
-    } else {
-      // 灯亮后继续轻轻晃（被光照着的悬浮感）
-      var r2 = (el - swayEnd)/1000;
-      ang = 12 + Math.sin(r2*2.2) * 2.5;
-      rx  = 8 + Math.sin(r2*2.2) * 1.0;
-    }
-    hen.style.transform = 'translateY('+ty.toFixed(1)+'px) rotateZ(-20deg) rotateY('+ang.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
-    drawRopes(1, ay0 + ty, ang * Math.PI/180);
+    // 恨字静止于最终姿态（无下放 / 无悬晃）
+    hen.style.transform = restTransform();
+    var ropeA = Math.min(1, el / ROPE_IN);
+    ropeA = ropeA*ropeA*(3-2*ropeA);              // smoothstep 淡入
+    hen.style.opacity = ropeA.toFixed(3);
+    drawRopes(ropeA, 0, REST_Y*Math.PI/180);       // 丝线末端已逐条贴合恨顶缘
 
     // 光：自上方缓缓打下（不再闪烁）—— 光束随强度下压、地面光池稍后亮起
     var L = 0, spotL = 0;
-    if(el >= swayEnd){
-      var lp = (el - swayEnd)/LIGHT; if(lp > 1) lp = 1;
-      L = lp*lp*(3-2*lp);                       // smoothstep 0→1
+    if(el >= lightStart){
+      var lp = (el - lightStart)/LIGHT; if(lp > 1) lp = 1;
+      L = lp*lp*(3-2*lp);                          // smoothstep 0→1
       var sp = (lp - 0.28)/0.72; if(sp < 0) sp = 0; if(sp > 1) sp = 1;
       spotL = sp*sp*(3-2*sp);
     }
