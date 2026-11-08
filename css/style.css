@@ -376,6 +376,11 @@ a{color:inherit;text-decoration:none;}
   font-family:var(--cn);font-size:12.5px;letter-spacing:.1em;color:var(--ink);
   padding:6px 12px;border:1px solid var(--line);border-right:2px solid var(--red);white-space:nowrap;
 }
+/* 详情页紧凑档案 */
+.profile.mini{margin-top:40px;padding-top:28px;border-top:1px solid var(--line);}
+.profile.mini .name{font-size:26px;}
+.profile.mini .tags{gap:5px;}
+.profile.mini .tag-row{font-size:11.5px;padding:5px 11px;}
 
 /* ---- 细数我的罪 … ---- */
 .sins{position:relative;z-index:3;margin-top:42px;}
