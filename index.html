@@ -217,7 +217,7 @@
   addEventListener('resize', size);
 
   // 时间线 (ms)：下放 → 悬晃 → 灯亮(闪烁) → 红「爱」阴影浮现 → 停留
-  var DESCEND=1500, SWING=900, LIGHT=700, SHADOW=1200, HOLD=1000;
+  var DESCEND=1500, SWING=900, LIGHT=1100, SHADOW=1200, HOLD=1000;
   var swayEnd    = DESCEND+SWING;         // 2400
   var shadowStart= swayEnd+LIGHT;         // 3100
   var total      = shadowStart+SHADOW+HOLD; // 5300
@@ -276,7 +276,7 @@
   function drawRopes(alpha, ay, angRad){
     ctx.clearRect(0,0,W,H);
     if(alpha <= 0) return;
-    var cx = W/2, topY = H*0.012;
+    var cx = W*0.58, topY = H*0.012;
     var swing = Math.sin(angRad) * charW * 0.20;      // 钟摆横移
     // 顶部固定横杆（贴画面上缘）
     ctx.lineCap = 'butt';
@@ -312,23 +312,16 @@
 
   // 减动效：静态构图后快速揭开
   if(reduce){
-    hen.style.transform = 'translateY(0) rotateZ(22deg) rotateY(-18deg) rotateX(8deg)';
+    hen.style.transform = 'translateY(0) rotateZ(20deg) rotateY(-18deg) rotateX(8deg)';
     drawRopes(1, henTop(), -18*Math.PI/180);
     beam.style.opacity = 1; halo.style.opacity = 1; spot.style.opacity = .9;
     ai.style.opacity = 1;
-    ai.style.transform = 'rotateX(30deg) scale(1)';
+    ai.style.transform = 'translate(-50%,-50%) rotateX(30deg) scale(1)';
     setTimeout(finish, 1400);
     return;
   }
 
-  // 舞台灯开启的闪烁曲线（0..1 → 亮度）
-  function flicker(p){
-    if(p < 0.12) return 0.55;
-    if(p < 0.22) return 0.06;
-    if(p < 0.48) return 0.78;
-    if(p < 0.56) return 0.22;
-    return 1;
-  }
+  // 舞台灯：平滑曲线（无闪烁）
 
   var T0 = null;
   function frame(now){
@@ -356,17 +349,21 @@
       ang = -18 + Math.sin(r2*2.2) * 2.5;
       rx  = 8 + Math.sin(r2*2.2) * 1.0;
     }
-    hen.style.transform = 'translateY('+ty.toFixed(1)+'px) rotateZ(22deg) rotateY('+ang.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
+    hen.style.transform = 'translateY('+ty.toFixed(1)+'px) rotateZ(20deg) rotateY('+ang.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
     drawRopes(1, ay0 + ty, ang * Math.PI/180);
 
-    // 光：灯闪烁亮起 → 稳定（光束、恨身柔光、地面光池同步）
-    var L = 0;
+    // 光：自上方缓缓打下（不再闪烁）—— 光束随强度下压、地面光池稍后亮起
+    var L = 0, spotL = 0;
     if(el >= swayEnd){
-      L = el < shadowStart ? flicker((el-swayEnd)/LIGHT) : 1;
+      var lp = (el - swayEnd)/LIGHT; if(lp > 1) lp = 1;
+      L = lp*lp*(3-2*lp);                       // smoothstep 0→1
+      var sp = (lp - 0.28)/0.72; if(sp < 0) sp = 0; if(sp > 1) sp = 1;
+      spotL = sp*sp*(3-2*sp);
     }
-    beam.style.opacity = L;
-    halo.style.opacity = L;
-    spot.style.opacity = (L*0.9).toFixed(3);
+    beam.style.opacity = L.toFixed(3);
+    beam.style.transform = 'translateX(-50%) translateY('+(-22*(1-L)).toFixed(2)+'%)';
+    halo.style.opacity = L.toFixed(3);
+    spot.style.opacity = (spotL*0.92).toFixed(3);
 
     // 红色「爱」的阴影：由虚到实，从光里浮现（blur 收拢 + 缩放落定）
     if(el > shadowStart){
@@ -376,7 +373,7 @@
       ai.style.filter = 'blur('+((1-ease)*13).toFixed(1)+'px)';
       var s = 1.22 - 0.22*ease;
       var dy = -14 * (1-ease);
-      ai.style.transform = 'rotateX(28deg) rotateZ(-16deg) scale('+s.toFixed(3)+') translateY('+dy.toFixed(1)+'px)';
+      ai.style.transform = 'translate(-50%,-50%) rotateX(28deg) rotateZ(-20deg) scale('+s.toFixed(3)+') translateY('+dy.toFixed(1)+'px)';
     }
 
     if(el > total){ finish(); return; }
