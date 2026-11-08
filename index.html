@@ -225,7 +225,7 @@
 
   (function buildLayers(){
     var hfs = parseFloat(getComputedStyle(hen).fontSize) || 60;
-    var LAYERS = 10, GAP = Math.max(1.0, hfs * 0.016);
+    var LAYERS = 10, GAP = Math.max(1.0, hfs * 0.010);
     var txt = (hen.textContent || '恨').trim();
     hen.textContent = '';
     for(var i=0;i<LAYERS;i++){
@@ -244,7 +244,7 @@
   // ---- 「爱」：参照图的扁平投影——不挤出、不放大，只随光池浮现（贴近地面的阴影感）----
   (function buildAi(){
     ai.textContent = '爱';
-    ai.style.color = 'rgb(60,10,16)';          // 深暗红投影（参照图中爱为暗色剪影）
+    ai.style.color = 'rgb(122,32,40)';          // 深暗红投影（参照图中爱为暗色剪影）
     ai.style.textShadow = '0 0 14px rgba(224,16,34,.28)';
     ai.style.opacity = '0';
   })();
@@ -309,10 +309,10 @@
 
   // 减动效：静态构图后快速揭开
   if(reduce){
-    hen.style.transform = 'translateY(0) rotateZ(18deg) rotateY(-12deg) rotateX(6deg)';
+    hen.style.transform = 'translateY(0) rotateZ(18deg) rotateY(30deg) rotateX(8deg)';
     drawRopes(1, henTop(), -18*Math.PI/180);
     beam.style.opacity = 1; halo.style.opacity = 1; spot.style.opacity = .9;
-    ai.style.transform = 'rotateX(24deg) rotateZ(-6deg) scale(1)';
+    ai.style.transform = 'translate(-50%,-50%) rotateX(52deg) rotateZ(-38deg) scale(1)';
     ai.style.opacity = 1;
     setTimeout(finish, 1400);
     return;
@@ -326,24 +326,24 @@
     if(T0 === null) T0 = now;
     var el = now - T0;
     var ay0 = henTop();
-    var ty = 0, ang = -18, rx = 8;
+    var ty = 0, ang = 30, rx = 8;
 
     if(el < DESCEND){
       // 「恨」被丝线从看不见的上方缓缓放下（减速入库），带轻微摆动
       var p = el/DESCEND;
       var e = 1 - Math.pow(1-p, 3);
       ty  = startY() * (1-e);
-      ang = -18 + Math.sin(p*6.28) * 4 * (1-p);
+      ang = 30 + Math.sin(p*6.28) * 4 * (1-p);
       rx  = 8 + Math.sin(p*6.28+1) * 1.5;
     } else if(el < swayEnd){
       // 悬晃：带基础偏转的 3D 钟摆（露出侧面厚度）
       var q = (el-DESCEND)/SWING;
-      ang = -18 + Math.sin(q*6.8) * 6 * (1-q*0.45);
+      ang = 30 + Math.sin(q*6.8) * 6 * (1-q*0.45);
       rx  = 8 + Math.sin(q*6.8) * 2.5;
     } else {
       // 灯亮后继续轻轻晃（被光照着的悬浮感）
       var r2 = (el - swayEnd)/1000;
-      ang = -18 + Math.sin(r2*2.2) * 2.5;
+      ang = 30 + Math.sin(r2*2.2) * 2.5;
       rx  = 8 + Math.sin(r2*2.2) * 1.0;
     }
     hen.style.transform = 'translateY('+ty.toFixed(1)+'px) rotateZ(18deg) rotateY('+ang.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
@@ -367,7 +367,7 @@
       var a = Math.min(1, (el - shadowStart)/SHADOW);
       var ease = a*a*(3-2*a);
       ai.style.opacity = ease.toFixed(3);
-      ai.style.transform = 'rotateX(24deg) rotateZ(-6deg) scale(1)';
+      ai.style.transform = 'translate(-50%,-50%) rotateX(52deg) rotateZ(-38deg) scale(1)';
     }
 
     if(el > total){ finish(); return; }
