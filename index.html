@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>絮 · XÙ — 祷念</title>
+<title>絮 · XÙ — 碎片索引</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;600;700&family=Noto+Sans+SC:wght@400;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
@@ -32,59 +32,24 @@
 
 <main class="poster">
 
-  <!-- TOP MARK BAR -->
-  <div class="topmark">
-    <span>絮 <span class="x">·</span> XÙ</span>
-    <span class="r">FILE 00 — 祷念 / DOSSIER</span>
-  </div>
-
   <!-- TOP BAR -->
   <header class="topbar">
-    <a class="brand" href="index.html"><span class="dot"></span>絮<small>XÙ</small></a>
+    <a class="brand" href="home.html"><span class="dot"></span>絮<small>XÙ</small></a>
   </header>
 
-  <!-- DOC TITLE -->
-  <section class="doc fade d1">
-    <div class="kicker"><span class="n">N°00</span> Dossier · 祷念档案</div>
-    <h1 class="doc-title">祷念</h1>
-  </section>
-
-  <!-- OPENER / 引言 -->
-  <section class="opener fade d1">
-    <p>請像雕刻藝術那樣褻瀆我……</p>
-    <p>用那顆湧動著 <span class="em">滾燙血液</span> 的心臟</p>
-    <p>……向我禱告吧……</p>
-  </section>
-
-  <!-- ' obscure ' 的來信 -->
-  <section class="letter fade d2">
-    <div class="from">' obscure ' 的來信：</div>
-
-    <blockquote class="frax">𝔟𝔢𝔩𝔦𝔢𝔳𝔢𝔯 𝔚𝔥𝔶 𝔡𝔬 𝔶𝔬𝔲 𝔠𝔬𝔪𝔢 ...</blockquote>
-    <div class="cn-quote">「 信徒 為何而來… 」</div>
-
-    <div class="atonement">替我 赎罪…</div>
-
-    <div class="desire">慾望</div>
-    <div class="for">" …為了… "</div>
-    <div class="frax atonement-q">" ... 𝔞𝔱𝔬𝔫𝔢𝔪𝔢𝔫𝔱 ? "</div>
-
-    <div class="sign">— ' 絮 '</div>
-  </section>
-
-  <!-- 细数我的罪 … 羽 骨 血 -->
+  <!-- 细数我的罪 … 羽 骨 血 神（可长按牵引红线串联） -->
   <section class="sins fade d2">
     <div class="kicker"><span class="n">04</span> Index · 碎片索引</div>
     <div class="sins-title">细数我的罪 …</div>
 
-    <div class="traces">
-      <!-- red thread connecting the four fragments (命运之线) -->
+    <div class="traces" id="traces">
+      <!-- 红线画在卡片之下（z-index 低于卡片），只从卡片间的缝隙透出，绝不遮挡卡片上层 -->
       <div class="dots" aria-hidden="true">
         <canvas id="thread" width="100" height="100"></canvas>
       </div>
 
       <!-- 羽 (right, upper) -->
-      <a class="trace t1" href="crow.html">
+      <a class="trace t1" href="crow.html" draggable="false">
         <span class="no">[ 01* ]</span>
         <span class="art"><img src="assets/yu.jpg" alt="羽"></span>
         <span class="label"><span class="cn">羽 <span class="ar">↗</span></span><span class="en">Feather</span></span>
@@ -92,7 +57,7 @@
       </a>
 
       <!-- 骨 (left, tall) -->
-      <a class="trace t2" href="bones.html">
+      <a class="trace t2" href="bones.html" draggable="false">
         <span class="no">[ 02* ]</span>
         <span class="art"><img src="assets/gu.jpg" alt="骨"></span>
         <span class="label"><span class="cn">骨 <span class="ar">↗</span></span><span class="en">Bone</span></span>
@@ -100,7 +65,7 @@
       </a>
 
       <!-- 血 (right, lower, indented) -->
-      <a class="trace t3" href="church.html">
+      <a class="trace t3" href="church.html" draggable="false">
         <span class="no">[ 03* ]</span>
         <span class="art"><img src="assets/xue.jpg" alt="血"></span>
         <span class="label"><span class="cn">血 <span class="ar">↗</span></span><span class="en">Blood</span></span>
@@ -108,7 +73,7 @@
       </a>
 
       <!-- 神 (left, lowest) -->
-      <a class="trace t4" href="statue.html">
+      <a class="trace t4" href="statue.html" draggable="false">
         <span class="no">[ 04* ]</span>
         <span class="art"><img src="assets/shen.jpg" alt="神"></span>
         <span class="label"><span class="cn">神 <span class="ar">↗</span></span><span class="en">Deity</span></span>
@@ -116,66 +81,143 @@
       </a>
     </div>
 
+    <p class="link-hint" id="linkHint"><b>长按</b>任意碎片 · 牵引<b>红线</b> · 串联另一块记忆</p>
+
     <div class="sin-keys"><span>羽</span><span>骨</span><span>血</span><span>神</span></div>
-
-    <figure class="sins-fig">
-      <img src="assets/hands.jpg" alt="伸向光的手">
-    </figure>
   </section>
 
-  <!-- END -->
-  <section class="end fade d3">
-    <p>…虐杀我的灵魂…</p>
-    <p class="endmark">..End..</p>
-    <div class="cross">&#8224;</div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer class="foot">
-    <a class="home-btn" href="index.html">絮</a>
-    <nav class="nav">
-      <a href="index.html">HOME</a>
-      <a href="terms.html">须知</a>
-      <a href="statue.html">祷念</a>
-    </nav>
-    <span class="listen">仍在倾听 <span class="b"></span></span>
-  </footer>
+  <!-- 右下角：进入裁剪后留下的原主页（档案正文） -->
+  <a class="enter-btn" href="home.html">进入档案 <span class="ar">›</span></a>
 
 </main>
 
 </div>
 
+<!-- ============ 交互红线：长按碎片拉出红线，接触到另一块即连上 ============ -->
 <script>
 (function(){
-  var c = document.getElementById('thread');
-  if(!c) return;
-  // 对应 t1(羽) t2(骨) t3(血) t4(神) 的卡片中心
-  var pts = [[71.5,17],[27.5,43],[77,60.5],[27,85.5]];
-  function draw(){
-    var r = c.getBoundingClientRect();
+  var wrap = document.getElementById('traces');
+  var cv   = document.getElementById('thread');
+  var hint = document.getElementById('linkHint');
+  if(!wrap || !cv) return;
+  var cards = Array.prototype.slice.call(wrap.querySelectorAll('.trace'));
+  var ctx = cv.getContext('2d');
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  var links = [];        // 已连成的红线 {a, b}
+  var drag  = null;      // 当前正在牵引 {from, x, y, over}
+  var LONGPRESS = 320;   // 长按触发毫秒
+  var MOVE_T    = 8;     // 移动阈值（px），超过即视为拖拽
+  var timer = null, srcIdx = -1, sx = 0, sy = 0, linking = false, justDragged = false;
+
+  function wrapRect(){ return wrap.getBoundingClientRect(); }
+  function size(){
+    var r = wrapRect();
     if(!r.width) return;
-    var dpr = window.devicePixelRatio || 1;
-    c.width  = Math.round(r.width*dpr);
-    c.height = Math.round(r.height*dpr);
-    var ctx = c.getContext('2d');
+    cv.width  = Math.round(r.width*dpr);
+    cv.height = Math.round(r.height*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
-    ctx.clearRect(0,0,r.width,r.height);
-    ctx.strokeStyle = '#e01022'; ctx.lineWidth = 1.4; ctx.globalAlpha = 0.7;
-    ctx.beginPath();
-    pts.forEach(function(p,i){
-      var x = p[0]/100*r.width, y = p[1]/100*r.height;
-      i ? ctx.lineTo(x,y) : ctx.moveTo(x,y);
-    });
-    ctx.stroke();
-    ctx.globalAlpha = 0.9; ctx.fillStyle = '#e01022';
-    pts.forEach(function(p){
-      var x = p[0]/100*r.width, y = p[1]/100*r.height;
-      ctx.beginPath(); ctx.arc(x,y,2.2,0,Math.PI*2); ctx.fill();
-    });
+    draw();
   }
-  window.addEventListener('resize', draw);
-  requestAnimationFrame(draw);
-  setTimeout(draw, 350);
+  function center(i){
+    var r = cards[i].getBoundingClientRect();
+    var w = wrapRect();
+    return { x:(r.left+r.right)/2 - w.left, y:(r.top+r.bottom)/2 - w.top };
+  }
+  function dot(p, rad, a){
+    ctx.fillStyle = 'rgba(224,16,34,'+a+')';
+    ctx.beginPath(); ctx.arc(p.x, p.y, rad, 0, Math.PI*2); ctx.fill();
+  }
+  function line(a, b, a1){
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = 'rgba(224,16,34,'+a1+')';
+    ctx.lineWidth = 1.7;
+    ctx.shadowColor = 'rgba(224,16,34,.45)'; ctx.shadowBlur = 7;
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+  function draw(){
+    var r = wrapRect();
+    ctx.clearRect(0,0,r.width,r.height);
+    // 已连成的命运之线（在卡片之下，仅缝隙可见）
+    links.forEach(function(l){
+      var a = center(l.a), b = center(l.b);
+      line(a, b, 0.82); dot(b, 2.6, 0.9);
+    });
+    // 正在牵引的红线
+    if(drag){
+      var a = center(drag.from);
+      var b = (drag.over >= 0) ? center(drag.over) : { x:drag.x, y:drag.y };
+      line(a, b, 0.96); dot(a, 3.2, 1);
+      if(drag.over >= 0) dot(b, 3.2, 1);
+    }
+  }
+  // 命中检测：返回指针所在（且非源）卡片下标
+  function cardAt(x, y, exc){
+    for(var i=0;i<cards.length;i++){
+      if(i === exc) continue;
+      var r = cards[i].getBoundingClientRect();
+      if(x>=r.left && x<=r.right && y>=r.top && y<=r.bottom) return i;
+    }
+    return -1;
+  }
+  function startLink(x, y){
+    if(srcIdx < 0) return;
+    linking = true;
+    var w = wrapRect();
+    drag = { from:srcIdx, x:x-w.left, y:y-w.top, over:-1 };
+    cards[srcIdx].classList.add('linking');
+  }
+  function beginLink(){ startLink(sx, sy); }
+  function endLink(){
+    clearTimeout(timer); timer = null;
+    if(linking){
+      var over = drag ? drag.over : -1;
+      if(over >= 0){ links.push({ a:drag.from, b:over }); if(hint) hint.classList.add('done'); }
+      cards.forEach(function(c){ c.classList.remove('linking','link-target'); });
+      drag = null; linking = false; justDragged = true;
+      setTimeout(function(){ justDragged = false; }, 0);
+      draw();
+    }
+    srcIdx = -1;
+  }
+
+  cards.forEach(function(el, i){
+    el.style.touchAction = 'none';
+    el.addEventListener('pointerdown', function(e){
+      e.preventDefault();          // 阻止 <a> 原生拖拽 / 文本选择，避免 pointercancel 打断连线
+      srcIdx = i; sx = e.clientX; sy = e.clientY; linking = false;
+      timer = setTimeout(beginLink, LONGPRESS);
+    });
+    el.addEventListener('dragstart', function(e){ e.preventDefault(); });
+    el.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+    el.addEventListener('click', function(e){
+      if(justDragged){ e.preventDefault(); justDragged = false; }
+    });
+  });
+
+  window.addEventListener('pointermove', function(e){
+    if(srcIdx < 0) return;
+    // 长按未触发前，移动视为滚动 —— 取消长按，不启动连线（保留页面滚动）
+    if(!linking){
+      if(Math.hypot(e.clientX-sx, e.clientY-sy) > MOVE_T) clearTimeout(timer);
+      return;
+    }
+    var w = wrapRect();
+    drag.x = e.clientX - w.left; drag.y = e.clientY - w.top;
+    var over = cardAt(e.clientX, e.clientY, drag.from);
+    if(over !== drag.over){
+      drag.over = over;
+      cards.forEach(function(c, ci){ c.classList.toggle('link-target', ci === over); });
+    }
+    draw();
+  });
+  window.addEventListener('pointerup', endLink);
+  window.addEventListener('pointercancel', endLink);
+
+  window.addEventListener('resize', size);
+  requestAnimationFrame(size);
+  setTimeout(size, 350);
 })();
 </script>
 
@@ -251,7 +293,6 @@
 
   // ---- 丝线：严格参照图——9条、近平行（顶底同宽不扇形）、每条向下微右漂1%W、
   //      自画面上缘直接垂下（无横杆）、亮白、最左两条更长垂到字左下方 ----
-  // [顶端x(×W偏移), 底端x(×W偏移), 额外长度px]
   // [顶端x(×W), 末端x(×W), 额外加长px, 末端y(%H)] —— 末端y 贴合该处「恨」字顶缘+轻扎入
   var MAP = [
     [-0.119, -0.109,   0, 0.354],
