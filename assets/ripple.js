@@ -1,4 +1,4 @@
-/* 详情页水波：黑红漩涡底图之上，随滚动流动的红色水波 */
+/* 详情页文字区底图之上的红色水波：随滚动荡漾流动 */
 (function(){
   var cv = document.querySelector('.ripple');
   if(!cv) return;
@@ -8,13 +8,16 @@
 
   function size(){
     var r = cv.getBoundingClientRect();
-    W = r.width; H = r.height;
-    cv.width  = Math.max(1, Math.round(W * dpr));
-    cv.height = Math.max(1, Math.round(H * dpr));
+    W = Math.max(1, Math.round(r.width));
+    H = Math.max(1, Math.round(r.height));
+    cv.width  = Math.round(W * dpr);
+    cv.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   size();
   window.addEventListener('resize', size);
+  window.addEventListener('load', size);
+  if(window.ResizeObserver){ try{ new ResizeObserver(size).observe(cv); }catch(e){} }
 
   var t = 0, lastY = window.scrollY || 0, vel = 0, rings = [];
 
@@ -22,8 +25,8 @@
     var y = window.scrollY || 0;
     var d = y - lastY; lastY = y;
     vel += Math.abs(d);
-    if(Math.abs(d) > 6 && rings.length < 9){
-      rings.push({ x: Math.random() * W, y: Math.random() * H, r: 0, a: 0.5 });
+    if(Math.abs(d) > 6 && rings.length < 10){
+      rings.push({ x: Math.random() * W, y: Math.random() * H, r: 0, a: 0.55 });
     }
   }, { passive: true });
 
@@ -32,38 +35,44 @@
     vel *= 0.90;
     ctx.clearRect(0, 0, W, H);
 
-    // 流动的红水层：相位由 scrollY 驱动 → 滚动时水波随之荡漾
     var sy = window.scrollY || 0;
-    var layers = 3;
-    for(var l = 0; l < layers; l++){
-      var amp   = 8 + l * 5 + Math.min(vel * 0.5, 26);
-      var yBase = H * (0.30 + l * 0.22);
-      var freq  = 0.010 + l * 0.004;
-      var phase = t * (0.5 + l * 0.25) + sy * 0.012 + l * 1.3;
+    ctx.globalCompositeOperation = 'lighter';   // 红光叠加在暗色漩涡上
+
+    var N = 6;                                   // 6 条红色水波线
+    for(var i = 0; i < N; i++){
+      var frac  = (i + 0.5) / N;
+      // 垂直方向轻微浮动 + 随滚动位移（让水波"跟着动"）
+      var baseY = frac * H + Math.sin(t * 0.6 + i) * 6 + Math.sin(sy * 0.02 + i) * 5;
+      var amp   = 10 + (i % 3) * 4 + Math.min(vel * 0.4, 22);   // 快速滚动时振幅变大
+      var freq  = 0.012 + (i % 3) * 0.003;
+      // 相位由时间与 scrollY 共同驱动 → 滚动时水波随之流动
+      var phase = t * (0.4 + (i % 3) * 0.2) + sy * 0.02 + i * 1.1;
+
       ctx.beginPath();
-      ctx.moveTo(0, yBase);
-      for(var x = 0; x <= W; x += 6){
-        var y = yBase
+      for(var x = 0; x <= W; x += 5){
+        var y = baseY
               + Math.sin(x * freq + phase) * amp
-              + Math.sin(x * freq * 2.4 + phase * 1.7) * amp * 0.35;
-        ctx.lineTo(x, y);
+              + Math.sin(x * freq * 2.3 + phase * 1.6) * amp * 0.3;
+        if(x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
       }
-      ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath();
-      var g = ctx.createLinearGradient(0, yBase - amp, 0, H);
-      g.addColorStop(0, 'rgba(210,28,38,0)');
-      g.addColorStop(1, 'rgba(190,22,32,' + (0.05 + l * 0.025) + ')');
-      ctx.fillStyle = g; ctx.fill();
+      var a = 0.10 + (i % 3) * 0.05;
+      ctx.strokeStyle = 'rgba(226,32,42,' + a + ')';
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
     }
 
+    ctx.globalCompositeOperation = 'source-over';
+
     // 快速滚动时散开的同心涟漪
-    for(var i = rings.length - 1; i >= 0; i--){
-      var rg = rings[i];
-      rg.r += 2.2 + vel * 0.05; rg.a -= 0.012;
-      if(rg.a <= 0){ rings.splice(i, 1); continue; }
+    for(var k = rings.length - 1; k >= 0; k--){
+      var rg = rings[k];
+      rg.r += 2.4 + vel * 0.05; rg.a -= 0.012;
+      if(rg.a <= 0){ rings.splice(k, 1); continue; }
       ctx.beginPath();
       ctx.arc(rg.x, rg.y, rg.r, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(224,26,36,' + rg.a + ')';
-      ctx.lineWidth = 1.2; ctx.stroke();
+      ctx.strokeStyle = 'rgba(226,32,42,' + rg.a + ')';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
     }
 
     requestAnimationFrame(frame);
