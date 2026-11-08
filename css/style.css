@@ -489,7 +489,7 @@ a{color:inherit;text-decoration:none;}
 #ropes{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;}
 /* 光束：自上方打下的锥形白光（穿过恨，落在地面光池） */
 .beam{
-  position:absolute;left:50%;top:0;z-index:2;
+  position:absolute;left:51.4%;top:0;z-index:2;
   width:min(74vw,540px);height:74%;
   transform:translateX(-50%);
   background:linear-gradient(180deg, rgba(245,243,238,.19) 0%, rgba(245,243,238,.075) 55%, transparent 92%);
@@ -498,7 +498,7 @@ a{color:inherit;text-decoration:none;}
 }
 /* 恨被照亮时身后的柔光 */
 .halo{
-  position:absolute;left:50%;top:30%;z-index:2;
+  position:absolute;left:51.4%;top:37.5%;z-index:2;
   width:min(52vw,380px);height:min(52vw,380px);
   transform:translate(-50%,-44%);
   background:radial-gradient(circle, rgba(245,243,238,.20) 0%, transparent 62%);
@@ -506,35 +506,37 @@ a{color:inherit;text-decoration:none;}
 }
 /* 地面光池：白色椭圆聚光（参照图），红「爱」阴影落在其中 */
 .spot{
-  position:absolute;left:56%;top:55%;width:min(48vw,440px);height:min(21vw,200px);
-  transform:translate(-50%,-50%) rotate(-28deg);z-index:6;
+  position:absolute;left:56%;top:62%;width:min(52vw,480px);height:min(24vw,220px);
+  transform:translate(-50%,-50%) rotate(0deg);z-index:6;
   background:radial-gradient(ellipse at center, rgba(253,252,250,.85) 0%, rgba(246,244,240,.40) 44%, transparent 74%);
   opacity:0;pointer-events:none;filter:blur(2px);
 }
 /* 立体字：「恨」由 JS 堆叠多层 .xl 沿 Z 轴挤出，正面亮白 → 侧面浅灰
    整体放大以对齐参考图（宽约16vw），悬于画面上三分之一 */
 .hen{
-  position:absolute;left:50%;top:30%;z-index:6;
+  position:absolute;left:52%;top:31%;z-index:6;
   font-family:'Ma Shan Zheng','Noto Serif SC',serif;
-  font-size:clamp(60px,16vw,150px);line-height:1;
+  font-size:clamp(84px,26vw,200px);line-height:1;
   transform-style:preserve-3d;will-change:transform;
 }
 .hen .xl{position:absolute;left:0;top:0;white-space:nowrap;}
+  .ai .xl{position:absolute;left:0;top:0;white-space:nowrap;}
 /* 立体字：「爱」同样由 JS 堆叠挤出，红正面 → 暗红侧面，趴在地面光池 */
 /* 「爱」：投影在光池里的红色阴影（扁平剪影，略带趴伏透视） */
 .ai{
-  position:absolute;left:56%;top:55%;z-index:6;
+  position:absolute;left:47%;top:56%;z-index:6;
   font-family:'Ma Shan Zheng','Noto Serif SC',serif;
-  font-size:clamp(66px,17vw,160px);line-height:1;
-  color:var(--red);opacity:0;
-  transform:translate(-50%,-50%) rotateX(28deg) rotateZ(-20deg) scale(1.22);
-  text-shadow:0 0 18px rgba(224,16,34,.55),0 0 46px rgba(224,16,34,.3);
-  will-change:transform,opacity,filter;
+  font-size:clamp(98px,30vw,240px);line-height:1;
+  color:var(--red);
+  transform-style:preserve-3d;
+  transform:rotateX(24deg) rotateZ(-6deg) scale(0.4);
+  text-shadow:0 0 10px rgba(224,16,34,.4),0 0 28px rgba(224,16,34,.2);
+  will-change:transform;
 }
 .skip{
-  position:absolute;right:18px;bottom:18px;z-index:7;
+  position:absolute;right:18px;bottom:18px;z-index:7;opacity:.3;
   background:none;border:1px solid rgba(245,243,238,.3);color:var(--ink-dim);
   font-family:var(--sans);font-size:11px;letter-spacing:.2em;
   padding:7px 14px;cursor:pointer;transition:.3s var(--ease);
 }
-.skip:hover{border-color:var(--red);color:var(--red);}
+.skip:hover{border-color:var(--red);color:var(--red);opacity:.85;}
