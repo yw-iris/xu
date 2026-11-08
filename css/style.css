@@ -304,7 +304,7 @@ a{color:inherit;text-decoration:none;}
 .home-cta .cta:hover .ar{color:#fff;transform:translateX(6px);}
 .home-cta .hint{font-family:var(--sans);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);margin-top:14px;}
 
-/* ============ DETAIL PAGE — black-red swirl backdrop + water ripple ============ */
+/* ============ DETAIL PAGE — black-red swirl backdrop ============ */
 .wrap.detail{position:relative;z-index:3;padding-top:4px;overflow:hidden;}
 .detail-text{position:relative;margin-top:10px;overflow:hidden;border-radius:8px;}
 .detail-bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:#08080a;}
@@ -318,9 +318,7 @@ a{color:inherit;text-decoration:none;}
     radial-gradient(130% 55% at 50% 0%, rgba(210,26,36,.30), transparent 55%),
     linear-gradient(180deg, rgba(8,8,10,.30), rgba(8,8,10,.62));
 }
-.detail-bg .ripple{position:absolute;inset:0;z-index:1;width:100%;height:100%;}
 .detail-text > *:not(.detail-bg){position:relative;z-index:3;}
-/* keep text legible over the moving water */
 .detail .bodytext p{text-shadow:0 1px 16px rgba(0,0,0,.6);}
 .detail .head .no{font-size:clamp(24px,6.4vw,32px);}
 .detail .head h2{font-size:clamp(54px,15vw,90px);}
