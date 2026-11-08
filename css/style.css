@@ -304,21 +304,9 @@ a{color:inherit;text-decoration:none;}
 .home-cta .cta:hover .ar{color:#fff;transform:translateX(6px);}
 .home-cta .hint{font-family:var(--sans);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);margin-top:14px;}
 
-/* ============ DETAIL PAGE — black-red swirl backdrop ============ */
+/* ============ DETAIL PAGE — solid dark backdrop ============ */
 .wrap.detail{position:relative;z-index:3;padding-top:4px;overflow:hidden;}
-.detail-text{position:relative;margin-top:10px;overflow:hidden;border-radius:8px;}
-.detail-bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:#08080a;}
-.detail-bg img{
-  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-  filter:grayscale(.45) brightness(.62) contrast(1.15) saturate(.85);opacity:.95;
-}
-.detail-bg::after{
-  content:"";position:absolute;inset:0;z-index:2;
-  background:
-    radial-gradient(130% 55% at 50% 0%, rgba(210,26,36,.30), transparent 55%),
-    linear-gradient(180deg, rgba(8,8,10,.30), rgba(8,8,10,.62));
-}
-.detail-text > *:not(.detail-bg){position:relative;z-index:3;}
+.detail-text{position:relative;margin-top:10px;overflow:hidden;border-radius:8px;background:#0a0a0a;}
 .detail .bodytext p{text-shadow:0 1px 16px rgba(0,0,0,.6);}
 .detail .head .no{font-size:clamp(24px,6.4vw,32px);}
 .detail .head h2{font-size:clamp(54px,15vw,90px);}
@@ -495,13 +483,13 @@ a{color:inherit;text-decoration:none;}
   background:radial-gradient(ellipse 75% 70% at 50% 42%, transparent 55%, rgba(0,0,0,.85) 100%);}
 
 /* 透视舞台：整体微微后仰，制造立体纵深 */
-.scene{position:absolute;inset:0;perspective:1100px;perspective-origin:50% 36%;}
+.scene{position:absolute;inset:0;perspective:1100px;perspective-origin:50% 36%;overflow:hidden;}
 .scene .stage{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(10deg);}
 
 #ropes{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;}
 /* 光束：自上方打下的锥形白光（穿过恨，落在地面光池） */
 .beam{
-  position:absolute;left:50%;top:0;z-index:2;
+  position:absolute;left:58%;top:0;z-index:2;
   width:min(74vw,540px);height:74%;
   transform:translateX(-50%);
   background:linear-gradient(180deg, rgba(245,243,238,.19) 0%, rgba(245,243,238,.075) 55%, transparent 92%);
@@ -510,7 +498,7 @@ a{color:inherit;text-decoration:none;}
 }
 /* 恨被照亮时身后的柔光 */
 .halo{
-  position:absolute;left:50%;top:30%;z-index:2;
+  position:absolute;left:58%;top:30%;z-index:2;
   width:min(52vw,380px);height:min(52vw,380px);
   transform:translate(-50%,-44%);
   background:radial-gradient(circle, rgba(245,243,238,.20) 0%, transparent 62%);
@@ -518,7 +506,7 @@ a{color:inherit;text-decoration:none;}
 }
 /* 地面光池：白色椭圆聚光（参照图），红「爱」阴影落在其中 */
 .spot{
-  position:absolute;left:58%;top:56%;width:min(34vw,330px);height:min(15vw,150px);
+  position:absolute;left:46%;top:55%;width:min(34vw,330px);height:min(15vw,150px);
   transform:translate(-50%,-50%);z-index:6;
   background:radial-gradient(ellipse at center, rgba(245,243,238,.32) 0%, rgba(245,243,238,.10) 46%, transparent 76%);
   opacity:0;pointer-events:none;filter:blur(3px);
@@ -526,20 +514,20 @@ a{color:inherit;text-decoration:none;}
 /* 立体字：「恨」由 JS 堆叠多层 .xl 沿 Z 轴挤出，正面亮白 → 侧面浅灰
    比例对齐参考图：小字（宽约12vw），悬于画面上三分之一 */
 .hen{
-  position:absolute;left:50%;top:30%;z-index:6;
+  position:absolute;left:58%;top:30%;z-index:6;
   font-family:'Ma Shan Zheng','Noto Serif SC',serif;
-  font-size:clamp(48px,12.5vw,120px);line-height:1;
+  font-size:clamp(44px,11vw,108px);line-height:1;
   transform-style:preserve-3d;will-change:transform;
 }
 .hen .xl{position:absolute;left:0;top:0;white-space:nowrap;}
 /* 立体字：「爱」同样由 JS 堆叠挤出，红正面 → 暗红侧面，趴在地面光池 */
 /* 「爱」：投影在光池里的红色阴影（扁平剪影，略带趴伏透视） */
 .ai{
-  position:absolute;left:58%;top:56%;z-index:6;
+  position:absolute;left:46%;top:55%;z-index:6;
   font-family:'Ma Shan Zheng','Noto Serif SC',serif;
-  font-size:clamp(42px,11vw,104px);line-height:1;
+  font-size:clamp(54px,13vw,128px);line-height:1;
   color:var(--red);opacity:0;
-  transform:rotateX(28deg) rotateZ(-16deg) scale(1.22);
+  transform:translate(-50%,-50%) rotateX(28deg) rotateZ(-20deg) scale(1.22);
   text-shadow:0 0 18px rgba(224,16,34,.55),0 0 46px rgba(224,16,34,.3);
   will-change:transform,opacity,filter;
 }
