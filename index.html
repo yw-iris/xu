@@ -225,7 +225,7 @@
 
   (function buildLayers(){
     var hfs = parseFloat(getComputedStyle(hen).fontSize) || 60;
-    var LAYERS = 18, GAP = Math.max(1.0, hfs * 0.030);
+    var LAYERS = 10, GAP = Math.max(1.0, hfs * 0.016);
     var txt = (hen.textContent || '恨').trim();
     hen.textContent = '';
     for(var i=0;i<LAYERS;i++){
@@ -241,23 +241,12 @@
     }
   })();
 
-  // ---- 立体字：「爱」同样多层沿 Z 轴挤出（红正面 → 暗红侧面），与「恨」统一立体风格 ----
+  // ---- 「爱」：参照图的扁平投影——不挤出、不放大，只随光池浮现（贴近地面的阴影感）----
   (function buildAi(){
-    var afs = parseFloat(getComputedStyle(ai).fontSize) || 60;
-    var LAYERS = 16, GAP = Math.max(1.0, afs*0.028);
-    var txt = (ai.textContent || '爱').trim();
-    ai.textContent = '';
-    for(var j=0;j<LAYERS;j++){
-      var d = document.createElement('div');
-      d.className = 'xl';
-      d.textContent = txt;
-      var t = j/(LAYERS-1);
-      var r = Math.round(240 - 195*t), g = Math.round(30 - 27*t), b = Math.round(44 - 35*t); // 亮红 → 深暗红
-      d.style.color = 'rgb('+r+','+g+','+b+')';
-      d.style.transform = 'translate(-50%,0) translateZ('+(-j*GAP).toFixed(2)+'px)';
-      if(j===0) d.style.textShadow = '0 0 9px rgba(224,16,34,.4)';
-      ai.appendChild(d);
-    }
+    ai.textContent = '爱';
+    ai.style.color = 'rgb(60,10,16)';          // 深暗红投影（参照图中爱为暗色剪影）
+    ai.style.textShadow = '0 0 14px rgba(224,16,34,.28)';
+    ai.style.opacity = '0';
   })();
 
   // ---- 丝线：纯白、自顶部居中垂下，近平行、略扇形张开（参照图：无红线、无交叉网）----
@@ -324,6 +313,7 @@
     drawRopes(1, henTop(), -18*Math.PI/180);
     beam.style.opacity = 1; halo.style.opacity = 1; spot.style.opacity = .9;
     ai.style.transform = 'rotateX(24deg) rotateZ(-6deg) scale(1)';
+    ai.style.opacity = 1;
     setTimeout(finish, 1400);
     return;
   }
@@ -372,16 +362,12 @@
     halo.style.opacity = L.toFixed(3);
     spot.style.opacity = (spotL*0.92).toFixed(3);
 
-    // 红「爱」：从光池里由小放大浮现 + 持续轻微悬浮摆动（与恨字统一节奏）
+    // 红「爱」：不放大、不挤出——随光池淡入成贴地投影（扁平，参照图）
     if(el > shadowStart){
       var a = Math.min(1, (el - shadowStart)/SHADOW);
-      var ease = 1 - Math.pow(1-a, 2.2);
-      var s = 0.4 + 0.6*ease;                 // 0.4 → 1.0
-      var dy = -22 * (1-ease);
-      var ph = (el - shadowStart)/1000;
-      var az = -6 + Math.sin(ph*2.2 + 0.6) * 2.5;   // 绕 Z 轻摆（露出侧面厚度）
-      var ax = 24 + Math.sin(ph*2.2 + 1.3) * 1.0;   // 绕 X 轻摆
-      ai.style.transform = 'rotateX('+ax.toFixed(2)+'deg) rotateZ('+az.toFixed(2)+'deg) scale('+s.toFixed(3)+') translateY('+dy.toFixed(1)+'px)';
+      var ease = a*a*(3-2*a);
+      ai.style.opacity = ease.toFixed(3);
+      ai.style.transform = 'rotateX(24deg) rotateZ(-6deg) scale(1)';
     }
 
     if(el > total){ finish(); return; }
