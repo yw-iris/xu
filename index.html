@@ -11,11 +11,13 @@
 </head>
 <body>
 
-<!-- ============ 开场动画（立体）：恨吊丝线下落 → 投影红「爱」 ============ -->
+<!-- ============ 开场动画（立体）：恨被丝线吊下 → 光打在恨上 → 投影出红「爱」的阴影 ============ -->
 <div class="intro" id="intro" aria-hidden="true">
   <div class="scene">
     <div class="stage" id="stage">
       <canvas id="ropes"></canvas>
+      <div class="beam" id="beam"></div>
+      <div class="halo" id="halo"></div>
       <div class="spot" id="spot"></div>
       <div class="hen" id="hen">恨</div>
       <div class="ai" id="ai">爱</div>
@@ -105,7 +107,7 @@
       <!-- 羽 (right, upper) -->
       <a class="trace t1" href="crow.html">
         <span class="no">[ 01* ]</span>
-        <span class="art"><img src="assets/crow.png" alt="羽"></span>
+        <span class="art"><img src="assets/yu.jpg" alt="羽"></span>
         <span class="label"><span class="cn">羽 <span class="ar">↗</span></span><span class="en">Feather</span></span>
         <span class="note">飞鸟衔走名字。</span>
       </a>
@@ -113,7 +115,7 @@
       <!-- 骨 (left, tall) -->
       <a class="trace t2" href="bones.html">
         <span class="no">[ 02* ]</span>
-        <span class="art"><img src="assets/skeleton.png" alt="骨"></span>
+        <span class="art"><img src="assets/gu.jpg" alt="骨"></span>
         <span class="label"><span class="cn">骨 <span class="ar">↗</span></span><span class="en">Bone</span></span>
         <span class="note">骨架替我记着姿势。</span>
       </a>
@@ -121,7 +123,7 @@
       <!-- 血 (right, lower, indented) -->
       <a class="trace t3" href="church.html">
         <span class="no">[ 03* ]</span>
-        <span class="art"><img src="assets/church.png" alt="血"></span>
+        <span class="art"><img src="assets/xue.jpg" alt="血"></span>
         <span class="label"><span class="cn">血 <span class="ar">↗</span></span><span class="en">Blood</span></span>
         <span class="note">它只流向你的膝。</span>
       </a>
@@ -129,7 +131,7 @@
       <!-- 神 (left, lowest) -->
       <a class="trace t4" href="statue.html">
         <span class="no">[ 04* ]</span>
-        <span class="art"><img src="assets/statue.png" alt="神"></span>
+        <span class="art"><img src="assets/shen.jpg" alt="神"></span>
         <span class="label"><span class="cn">神 <span class="ar">↗</span></span><span class="en">Deity</span></span>
         <span class="note">石也会流血。</span>
       </a>
@@ -194,12 +196,12 @@
 })();
 </script>
 
-<!-- 开场动画逻辑（立体）：恨吊丝线悬晃 → 坠落 → 投影红「爱」 -->
+<!-- 开场动画逻辑（立体）：恨吊丝线放下 → 光打在恨上 → 投影出红「爱」的阴影 -->
 <script>
 (function(){
   var intro = document.getElementById('intro');
   if(!intro) return;
-  var KEY = 'xu_intro_v2';
+  var KEY = 'xu_intro_v3';
   var force = /[?&]intro\b/.test(location.search);
   if(!force && sessionStorage.getItem(KEY)){ intro.parentNode.removeChild(intro); return; }
 
@@ -208,6 +210,8 @@
   var hen = document.getElementById('hen');
   var ai  = document.getElementById('ai');
   var spot= document.getElementById('spot');
+  var beam= document.getElementById('beam');
+  var halo= document.getElementById('halo');
   var skip= document.getElementById('skip');
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -222,12 +226,11 @@
   size();
   addEventListener('resize', size);
 
-  // 时间线 (ms)：下放 → 悬晃 → 坠落 → 「爱」投影
-  var DESCEND=1500, SWING=900, FALL=1100, AIIN=1000, HOLD=800;
-  var swingEnd = DESCEND+SWING;       // 2400
-  var fallEnd  = swingEnd+FALL;       // 3500
-  var aiStart  = fallEnd;             // 3500
-  var total    = aiStart+AIIN+HOLD;   // 5300
+  // 时间线 (ms)：下放 → 悬晃 → 灯亮(闪烁) → 红「爱」阴影浮现 → 停留
+  var DESCEND=1500, SWING=900, LIGHT=700, SHADOW=1200, HOLD=1000;
+  var swayEnd    = DESCEND+SWING;         // 2400
+  var shadowStart= swayEnd+LIGHT;         // 3100
+  var total      = shadowStart+SHADOW+HOLD; // 5300
 
   // ---- 立体字：「恨」多层沿 Z 轴堆叠挤出（正面亮白 → 侧面浅灰），厚度随字号自适应 ----
   var charW = 60;
@@ -252,22 +255,6 @@
       d.style.transform = 'translate(-50%,0) translateZ('+(-i*GAP).toFixed(2)+'px)';
       if(i===0) d.style.textShadow = '0 0 10px rgba(255,255,255,.18)';
       hen.appendChild(d);
-    }
-    // 「爱」同样立体挤出：红正面 → 暗红侧面
-    var afs = parseFloat(getComputedStyle(ai).fontSize) || 55;
-    var atxt = (ai.textContent || '爱').trim();
-    ai.textContent = '';
-    var AL = 16, AGAP = Math.max(1.0, afs * 0.028);
-    for(var j=0;j<AL;j++){
-      var e = document.createElement('div');
-      e.className = 'xl';
-      e.textContent = atxt;
-      var u = j/(AL-1);
-      var cr = Math.round(228-146*u), cg = Math.round(18-8*u), cb = Math.round(36-16*u);
-      e.style.color = 'rgb('+cr+','+Math.max(0,cg)+','+Math.max(0,cb)+')';
-      e.style.transform = 'translate(-50%,-50%) translateZ('+(-j*AGAP).toFixed(2)+'px)';
-      if(j===0) e.style.textShadow = '0 0 8px rgba(224,16,34,.6),0 0 24px rgba(224,16,34,.35)';
-      ai.appendChild(e);
     }
   })();
 
@@ -337,10 +324,20 @@
   if(reduce){
     hen.style.transform = 'translateY(0) rotateZ(-6deg) rotateY(-18deg) rotateX(8deg)';
     drawRopes(1, henTop(), -18*Math.PI/180);
-    ai.style.opacity = 1; spot.style.opacity = .9;
-    ai.style.transform = 'rotateX(48deg) scale(1)';
+    beam.style.opacity = 1; halo.style.opacity = 1; spot.style.opacity = .9;
+    ai.style.opacity = 1;
+    ai.style.transform = 'rotateX(30deg) scale(1)';
     setTimeout(finish, 1400);
     return;
+  }
+
+  // 舞台灯开启的闪烁曲线（0..1 → 亮度）
+  function flicker(p){
+    if(p < 0.12) return 0.55;
+    if(p < 0.22) return 0.06;
+    if(p < 0.48) return 0.78;
+    if(p < 0.56) return 0.22;
+    return 1;
   }
 
   var T0 = null;
@@ -348,8 +345,8 @@
     if(done) return;
     if(T0 === null) T0 = now;
     var el = now - T0;
-    var cx = W/2, ay0 = henTop();
-    var ty = 0, ang = 0, rx = 0, ropeAlpha = 1;
+    var ay0 = henTop();
+    var ty = 0, ang = -18, rx = 8;
 
     if(el < DESCEND){
       // 「恨」被丝线从看不见的上方缓缓放下（减速入库），带轻微摆动
@@ -358,30 +355,38 @@
       ty  = startY() * (1-e);
       ang = -18 + Math.sin(p*6.28) * 4 * (1-p);
       rx  = 8 + Math.sin(p*6.28+1) * 1.5;
-    } else if(el < swingEnd){
+    } else if(el < swayEnd){
       // 悬晃：带基础偏转的 3D 钟摆（露出侧面厚度）
       var q = (el-DESCEND)/SWING;
-      ty  = 0;
       ang = -18 + Math.sin(q*6.8) * 6 * (1-q*0.45);
       rx  = 8 + Math.sin(q*6.8) * 2.5;
-    } else if(el < fallEnd){
-      var f = (el-swingEnd)/FALL;                      // 0..1
-      var e2 = f*f;                                    // 重力加速
-      ty  = e2 * (H*0.98);
-      ang = -12 + f*40;                                // 坠落翻滚
-      rx  = 8 + f*38;
-      ropeAlpha = Math.max(0, 1 - f*7);                // 丝线骤断
     } else {
-      ty = H*0.98; ang = 28; rx = 46; ropeAlpha = 0;
+      // 灯亮后继续轻轻晃（被光照着的悬浮感）
+      var r2 = (el - swayEnd)/1000;
+      ang = -18 + Math.sin(r2*2.2) * 2.5;
+      rx  = 8 + Math.sin(r2*2.2) * 1.0;
     }
     hen.style.transform = 'translateY('+ty.toFixed(1)+'px) rotateZ(-6deg) rotateY('+ang.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
-    drawRopes(ropeAlpha, ay0 + ty, ang * Math.PI/180);
+    drawRopes(1, ay0 + ty, ang * Math.PI/180);
 
-    if(el > aiStart){
-      var a = Math.min(1, (el - aiStart)/AIIN);
-      ai.style.opacity = a;
-      spot.style.opacity = (a*0.9).toFixed(3);
-      ai.style.transform = 'rotateX(48deg) scale('+(1.08 - 0.08*a).toFixed(3)+')';
+    // 光：灯闪烁亮起 → 稳定（光束、恨身柔光、地面光池同步）
+    var L = 0;
+    if(el >= swayEnd){
+      L = el < shadowStart ? flicker((el-swayEnd)/LIGHT) : 1;
+    }
+    beam.style.opacity = L;
+    halo.style.opacity = L;
+    spot.style.opacity = (L*0.9).toFixed(3);
+
+    // 红色「爱」的阴影：由虚到实，从光里浮现（blur 收拢 + 缩放落定）
+    if(el > shadowStart){
+      var a = Math.min(1, (el - shadowStart)/SHADOW);
+      var ease = 1 - Math.pow(1-a, 2.2);
+      ai.style.opacity = ease;
+      ai.style.filter = 'blur('+((1-ease)*13).toFixed(1)+'px)';
+      var s = 1.22 - 0.22*ease;
+      var dy = -14 * (1-ease);
+      ai.style.transform = 'rotateX(30deg) scale('+s.toFixed(3)+') translateY('+dy.toFixed(1)+'px)';
     }
 
     if(el > total){ finish(); return; }
