@@ -391,6 +391,13 @@ a{color:inherit;text-decoration:none;}
   border-left:2px solid var(--red);padding-left:12px;margin-bottom:18px;
 }
 .sin-keys{display:flex;justify-content:space-around;margin-top:18px;font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.2em;color:var(--ink-faint);}
+.sins-fig{margin:22px 0 2px;position:relative;z-index:3;}
+.sins-fig img{
+  display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:3px;
+  filter:saturate(.92) contrast(1.04);
+  box-shadow:0 22px 54px -30px rgba(0,0,0,.95), 0 0 0 1px rgba(224,16,34,.10) inset;
+}
+.sins-fig::after{content:"";position:absolute;left:0;top:0;width:26px;height:2px;background:var(--red);}
 
 /* ---- end ---- */
 .end{position:relative;z-index:3;text-align:center;margin:46px auto 8px;font-family:var(--serif);font-size:clamp(15px,4.2vw,20px);line-height:2;letter-spacing:.08em;color:var(--ink-dim);}
