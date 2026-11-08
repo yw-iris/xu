@@ -252,27 +252,29 @@
   // ---- 丝线：严格参照图——9条、近平行（顶底同宽不扇形）、每条向下微右漂1%W、
   //      自画面上缘直接垂下（无横杆）、亮白、最左两条更长垂到字左下方 ----
   // [顶端x(×W偏移), 底端x(×W偏移), 额外长度px]
+  // [顶端x(×W), 末端x(×W), 额外加长px, 末端y(%H)] —— 末端y 贴合该处「恨」字顶缘+轻扎入
   var MAP = [
-    [-0.119, -0.109, 150],
-    [-0.093, -0.083, 140],
-    [-0.070, -0.059,   0],
-    [-0.055, -0.045,   0],
-    [-0.016, -0.001,   0],
-    [-0.001,  0.013,   0],
-    [ 0.029,  0.041,   0],
-    [ 0.041,  0.055,   0],
-    [ 0.119,  0.128,   0]
+    [-0.119, -0.109,   0, 0.354],
+    [-0.093, -0.083,   0, 0.352],
+    [-0.070, -0.059,   0, 0.300],
+    [-0.055, -0.045,   0, 0.293],
+    [-0.016, -0.001,   0, 0.274],
+    [-0.001,  0.013,   0, 0.273],
+    [ 0.029,  0.041,   0, 0.388],
+    [ 0.041,  0.055,   0, 0.358],
+    [ 0.119,  0.128,   0, 0.416]
   ];
   var strands = [];
   for(var m=0;m<MAP.length;m++){
-    strands.push({topX:MAP[m][0], botX:MAP[m][1], extra:MAP[m][2]});
+    strands.push({topX:MAP[m][0], botX:MAP[m][1], extra:MAP[m][2], ey:MAP[m][3]});
   }
 
   function henTop(){ return H * 0.30; }
   // 下放起点：字完全隐没在视口上方（看不到的上面）
   function startY(){ return -(henTop() + charW*1.6); }
 
-  // 绘制丝线：无横杆、近平行、微右漂，端点扎进「恨」上沿（字盖住线，呈现被吊起）
+  // 绘制丝线：无横杆、近平行、微右漂；末端逐条贴合「恨」字顶缘（左「忄」左高右低、
+  // 右「艮」左低右高的双峰结构），像参照图那样一缕缕系在字顶笔画上
   function drawRopes(alpha, ay, angRad){
     ctx.clearRect(0,0,W,H);
     if(alpha <= 0) return;
@@ -283,7 +285,7 @@
       var st = strands[s];
       var sx = cx + st.topX*W, sy = topY;
       var ex = cx + st.botX*W + swing;
-      var ey = ay - charW*0.08 + st.extra;            // 普通线止于字上沿，左两条垂过字左侧
+      var ey = st.ey * H + st.extra;                  // 末端直接落在字顶缘（已含轻扎入）
       ctx.strokeStyle = 'rgba(245,243,238,'+(0.92*alpha).toFixed(3)+')';
       ctx.lineWidth = 1.3;
       ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(ex,ey); ctx.stroke();
