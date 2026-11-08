@@ -42,6 +42,9 @@
     <div class="kicker"><span class="n">04</span> Index · 碎片索引</div>
     <div class="sins-title">细数我的罪 …</div>
 
+    <!-- 红线交互提示：置于标题下、卡片之上的醒目位置（非页底） -->
+    <p class="link-hint" id="linkHint"><b>长按</b>任意碎片 · 牵引<b>红线</b> · 串联其它记忆<span class="hint-sub">（可任意多重连接）</span></p>
+
     <div class="traces" id="traces">
       <!-- 红线画在卡片之下（z-index 低于卡片），只从卡片间的缝隙透出，绝不遮挡卡片上层 -->
       <div class="dots" aria-hidden="true">
@@ -80,8 +83,6 @@
         <span class="note">石也会流血。</span>
       </a>
     </div>
-
-    <p class="link-hint" id="linkHint"><b>长按</b>任意碎片 · 牵引<b>红线</b> · 串联另一块记忆</p>
 
     <div class="sin-keys"><span>羽</span><span>骨</span><span>血</span><span>神</span></div>
   </section>
@@ -161,6 +162,14 @@
     }
     return -1;
   }
+  // 是否已存在该无序对（避免同对重复叠线；不同对、多重连接均允许）
+  function pairExists(a, b){
+    for(var i=0;i<links.length;i++){
+      var l = links[i];
+      if((l.a===a && l.b===b) || (l.a===b && l.b===a)) return true;
+    }
+    return false;
+  }
   function startLink(x, y){
     if(srcIdx < 0) return;
     linking = true;
@@ -173,7 +182,10 @@
     clearTimeout(timer); timer = null;
     if(linking){
       var over = drag ? drag.over : -1;
-      if(over >= 0){ links.push({ a:drag.from, b:over }); if(hint) hint.classList.add('done'); }
+      if(over >= 0 && !pairExists(drag.from, over)){
+        links.push({ a:drag.from, b:over });
+        if(hint) hint.innerHTML = '已连 <b>'+links.length+'</b> 条命运之线 · 继续长按串联其它记忆';
+      }
       cards.forEach(function(c){ c.classList.remove('linking','link-target'); });
       drag = null; linking = false; justDragged = true;
       setTimeout(function(){ justDragged = false; }, 0);
