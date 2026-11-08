@@ -122,19 +122,24 @@
   size();
   addEventListener('resize', size);
 
-  // 时间线 (ms)：红线淡入(伴随恨字) → 灯亮 → 红「爱」阴影浮现 → 停留
-  // 不再有“恨”被丝线吊落的下放/悬晃动画；恨字静止于最终姿态，
-  // 9 条丝线自画面上缘垂下，末端严格系于「恨」字顶缘（逐条贴合、轻扎入）。
-  var ROPE_IN = 650, LIGHT = 1100, SHADOW = 1300, HOLD = 1500;
-  var lightStart  = 250;
-  var shadowStart = lightStart + LIGHT;            // 1350
-  var total = shadowStart + SHADOW + HOLD;         // ~4150
+  // 时间线 (ms)：整组（恨 + 丝线）自上方坠下、由无到有 → 灯亮 → 红「爱」阴影浮现 → 停留
+  // 丝线仍严格系于「恨」顶缘（逐条贴合、轻扎入），但整组作为一体从画面上方落下出现。
+  var DROP = 1150, LIGHT = 1000, SHADOW = 1100, HOLD = 1500;
+  var lightStart  = DROP;                          // 灯在整组落定后亮起
+  var shadowStart = lightStart + LIGHT;            // 2150
+  var total = shadowStart + SHADOW + HOLD;         // ~4750
 
   // 恨字静止姿态（与丝线连接点标定一致）
   var REST_Z = -20, REST_Y = 12, REST_X = 8;
-  function restTransform(){
-    return 'translateY(0px) rotateZ('+REST_Z+'deg) rotateY('+REST_Y+'deg) rotateX('+REST_X+'deg)';
+  function restTransform(dy){
+    return 'translateY('+((dy==null?0:dy))+'px) rotateZ('+REST_Z+'deg) rotateY('+REST_Y+'deg) rotateX('+REST_X+'deg)';
   }
+
+  // 初始：整组（恨 + 丝线）隐藏于画面上方——由无到有地坠下，避免开场闪现
+  hen.style.opacity = '0';
+  hen.style.transform = restTransform(-H);          // 上移整整一个视口高度
+  canvas.style.opacity = '0';
+  canvas.style.transform = 'translateY(-118%)';
 
   // ---- 立体字：「恨」多层沿 Z 轴堆叠挤出（正面亮白 → 侧面浅灰），厚度随字号自适应 ----
   var charW = 60;
@@ -257,10 +262,12 @@
   }
   if(skip) skip.addEventListener('click', finish);
 
-  // 减动效：静态构图后快速揭开（同样不吊落，丝线严格系于恨顶缘）
+  // 减动效：静态构图后快速揭开（整组直接落定，丝线严格系于恨顶缘）
   if(reduce){
     hen.style.transform = restTransform();
     hen.style.opacity = 1;
+    canvas.style.transform = 'none';
+    canvas.style.opacity = 1;
     drawRopes(1, 0, REST_Y*Math.PI/180);
     beam.style.opacity = 1; halo.style.opacity = 1; spot.style.opacity = .9;
     ai.style.transform = 'translate(-50%,-50%) rotateX(54deg) rotateZ(-38deg) scale(1)';
@@ -269,21 +276,27 @@
     return;
   }
 
-  // 舞台灯：平滑曲线（无闪烁）；恨字静止、丝线自开场即系于其顶缘
+  // 舞台灯：平滑曲线（无闪烁）；灯与红「爱」在整组落定后才亮起
   var T0 = null;
   function frame(now){
     if(done) return;
     if(T0 === null) T0 = now;
     var el = now - T0;
 
-    // 恨字静止于最终姿态（无下放 / 无悬晃）
-    hen.style.transform = restTransform();
-    var ropeA = Math.min(1, el / ROPE_IN);
-    ropeA = ropeA*ropeA*(3-2*ropeA);              // smoothstep 淡入
-    hen.style.opacity = ropeA.toFixed(3);
-    drawRopes(ropeA, 0, REST_Y*Math.PI/180);       // 丝线末端已逐条贴合恨顶缘
+    // —— 整组下落入场：恨 + 丝线作为一体从画面上方坠下、由无到有 ——
+    var drop = Math.min(1, el / DROP);
+    var de   = drop*drop*(3-2*drop);               // smoothstep
+    var shift = (1 - de);                          // 1→0 落定
+    var visA  = Math.min(1, de*1.5);               // 透明度（略快于位移）
+    // 恨：在最终静止姿态上叠加自上方落下的整视口位移
+    hen.style.transform = restTransform((-H*shift).toFixed(1));
+    hen.style.opacity   = visA.toFixed(3);
+    // 丝线画布：整张随组从上方坠下 + 同组淡入（末端始终严格系于恨顶缘，随组移动）
+    canvas.style.transform = 'translateY('+(-118*shift).toFixed(2)+'%)';
+    canvas.style.opacity   = visA.toFixed(3);
+    drawRopes(1, 0, REST_Y*Math.PI/180);
 
-    // 光：自上方缓缓打下（不再闪烁）—— 光束随强度下压、地面光池稍后亮起
+    // 光：整组落定后，自上方缓缓打下（不再闪烁）—— 光束随强度下压、地面光池稍后亮起
     var L = 0, spotL = 0;
     if(el >= lightStart){
       var lp = (el - lightStart)/LIGHT; if(lp > 1) lp = 1;
