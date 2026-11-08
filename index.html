@@ -28,7 +28,7 @@
     <div class="sins-title">细数我的罪 …</div>
 
     <!-- 红线交互提示：置于标题下、卡片之上的醒目位置（非页底） -->
-    <p class="link-hint" id="linkHint"><b>点击</b>任意碎片选中，再<b>点击</b>另一块 · 红线即连成<span class="hint-sub">（可任意多重连接 · 点 ↗ 打开详情）</span></p>
+    <p class="link-hint" id="linkHint"><b>双击</b>任意碎片选中，再<b>点击</b>另一块 · 红线即连成<span class="hint-sub">（可任意多重连接 · 点 ↗ 打开详情）</span></p>
 
     <div class="traces" id="traces">
       <!-- 红线画在卡片之下（z-index 低于卡片），只从卡片间的缝隙透出，绝不遮挡卡片上层 -->
@@ -87,7 +87,7 @@
 
 </div>
 
-<!-- ============ 交互红线：点击碎片选中，再点击另一块即连成红线 ============ -->
+<!-- ============ 交互红线：双击碎片选中，再点击另一块即连成红线 ============ -->
 <script>
 (function(){
   var wrap = document.getElementById('traces');
@@ -154,19 +154,19 @@
 
   function toggle(i){
     if(sel === -1){
-      // 第一次点击：选中该碎片（红边框变粗 = 待连线）
+      // 双击：选中该碎片（红边框变粗 = 待连线）
       setSel(i);
       if(hint) hint.innerHTML = '已选中 <b>'+(i+1)+'号</b> 碎片 · 再点击另一块连成红线';
     } else if(sel === i){
-      // 再次点击同一块：取消选择
+      // 双击同一块：取消选择
       clearSel();
       if(hint) hint.innerHTML = DEFAULT_HINT;
     } else {
-      // 第二次点击另一块：连成红线
+      // 双击另一块：也直接连成（与「单击连接」等价）
       var ok = !pairExists(sel, i);
       if(ok) links.push({ a:sel, b:i });
       clearSel();
-      if(ok && hint) hint.innerHTML = '已连 <b>'+links.length+'</b> 条命运之线 · 继续点击其它碎片串联';
+      if(ok && hint) hint.innerHTML = '已连 <b>'+links.length+'</b> 条命运之线 · 继续双击选中、点击连成';
       draw();
     }
   }
@@ -175,8 +175,20 @@
     el.style.touchAction = 'manipulation';
     el.addEventListener('dragstart', function(e){ e.preventDefault(); });
     el.addEventListener('contextmenu', function(e){ e.preventDefault(); });
-    // 点击碎片 = 选中/连线；点 ↗ 箭头 = 打开详情页（放行默认导航）
+    // 单击：仅当已选中一块时，点另一块即连成红线；卡片本体永不跳转（避免误入详情页）
     el.addEventListener('click', function(e){
+      if(e.target.closest('.ar')) return;   // ↗ 箭头：放行，打开详情页
+      e.preventDefault();
+      if(sel >= 0 && sel !== i){
+        var ok = !pairExists(sel, i);
+        if(ok) links.push({ a:sel, b:i });
+        clearSel();
+        if(ok && hint) hint.innerHTML = '已连 <b>'+links.length+'</b> 条命运之线 · 继续双击选中、点击连成';
+        draw();
+      }
+    });
+    // 双击：选中 / 取消选中该碎片
+    el.addEventListener('dblclick', function(e){
       if(e.target.closest('.ar')) return;
       e.preventDefault();
       toggle(i);
