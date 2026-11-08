@@ -175,9 +175,9 @@
     el.style.touchAction = 'manipulation';
     el.addEventListener('dragstart', function(e){ e.preventDefault(); });
     el.addEventListener('contextmenu', function(e){ e.preventDefault(); });
-    // 单击：仅当已选中一块时，点另一块即连成红线；卡片本体永不跳转（避免误入详情页）
+    // 单击：仅当已选中一块时，点另一块即连成红线；点击「进入 / ↗」放行进入详情页
     el.addEventListener('click', function(e){
-      if(e.target.closest('.ar')) return;   // ↗ 箭头：放行，打开详情页
+      if(e.target.closest('.ar') || e.target.closest('.enter')) return;   // 进入 / ↗：放行，打开详情页
       e.preventDefault();
       if(sel >= 0 && sel !== i){
         var ok = !pairExists(sel, i);
@@ -187,9 +187,9 @@
         draw();
       }
     });
-    // 双击：选中 / 取消选中该碎片
+    // 双击：选中 / 取消选中该碎片（点在「进入 / ↗」上时放行导航）
     el.addEventListener('dblclick', function(e){
-      if(e.target.closest('.ar')) return;
+      if(e.target.closest('.ar') || e.target.closest('.enter')) return;
       e.preventDefault();
       toggle(i);
     });
