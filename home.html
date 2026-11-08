@@ -10,6 +10,22 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<!-- ============ 开场动画（立体）：恨被丝线吊下 → 光打在恨上 → 投影出红「爱」的阴影 ============ -->
+<div class="intro" id="intro" aria-hidden="true">
+  <canvas id="ropes"></canvas>
+  <div class="scene">
+    <div class="stage" id="stage">
+      <div class="beam" id="beam"></div>
+      <div class="halo" id="halo"></div>
+      <div class="spot" id="spot"></div>
+      <div class="hen" id="hen">恨</div>
+      <div class="ai" id="ai">爱</div>
+    </div>
+  </div>
+  <button class="skip" id="skip" type="button">跳过 ›</button>
+</div>
+
+
 
 <div class="device">
   <span class="notch"></span>
@@ -79,9 +95,197 @@
     <span class="listen">仍在倾听 <span class="b"></span></span>
   </footer>
 
+
+  <!-- 右下角：进入「碎片索引」模块页（羽骨血神四碎片 + 红线交互） -->
+  <a class="enter-btn" href="index.html">进入档案 <span class="ar">›</span></a>
 </main>
 
 </div>
+
+
+<!-- 开场动画逻辑（立体）：恨吊丝线放下 → 光打在恨上 → 投影出红「爱」的阴影 -->
+<script>
+(function(){
+  var intro = document.getElementById('intro');
+  if(!intro) return;
+  var KEY = 'xu_intro_v3';
+  var force = /[?&]intro\b/.test(location.search);
+  if(!force && localStorage.getItem(KEY)){ intro.parentNode.removeChild(intro); return; }
+
+  var canvas = document.getElementById('ropes');
+  var ctx = canvas.getContext('2d');
+  var hen = document.getElementById('hen');
+  var ai  = document.getElementById('ai');
+  var spot= document.getElementById('spot');
+  var beam= document.getElementById('beam');
+  var halo= document.getElementById('halo');
+  var skip= document.getElementById('skip');
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var W = 0, H = 0;
+  function size(){
+    W = innerWidth; H = innerHeight;
+    canvas.width  = W * dpr;
+    canvas.height = H * dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  size();
+  addEventListener('resize', size);
+
+  // 时间线 (ms)：红线淡入(伴随恨字) → 灯亮 → 红「爱」阴影浮现 → 停留
+  // 不再有“恨”被丝线吊落的下放/悬晃动画；恨字静止于最终姿态，
+  // 9 条丝线自画面上缘垂下，末端严格系于「恨」字顶缘（逐条贴合、轻扎入）。
+  var ROPE_IN = 650, LIGHT = 1100, SHADOW = 1300, HOLD = 1500;
+  var lightStart  = 250;
+  var shadowStart = lightStart + LIGHT;            // 1350
+  var total = shadowStart + SHADOW + HOLD;         // ~4150
+
+  // 恨字静止姿态（与丝线连接点标定一致）
+  var REST_Z = -20, REST_Y = 12, REST_X = 8;
+  function restTransform(){
+    return 'translateY(0px) rotateZ('+REST_Z+'deg) rotateY('+REST_Y+'deg) rotateX('+REST_X+'deg)';
+  }
+
+  // ---- 立体字：「恨」多层沿 Z 轴堆叠挤出（正面亮白 → 侧面浅灰），厚度随字号自适应 ----
+  var charW = 60;
+  function measure(){
+    var fs = parseFloat(getComputedStyle(hen).fontSize);
+    charW = (fs || 60) * 1.04;
+  }
+  measure(); addEventListener('resize', measure);
+
+  (function buildLayers(){
+    var hfs = parseFloat(getComputedStyle(hen).fontSize) || 60;
+    var LAYERS = 10, GAP = Math.max(1.0, hfs * 0.010);
+    var txt = (hen.textContent || '恨').trim();
+    hen.textContent = '';
+    for(var i=0;i<LAYERS;i++){
+      var d = document.createElement('div');
+      d.className = 'xl';
+      d.textContent = txt;
+      var t = i/(LAYERS-1);                          // 0 正面 → 1 背面
+      var r = Math.round(255-160*t), g = Math.round(254-162*t), b = Math.round(250-165*t);
+      d.style.color = 'rgb('+r+','+g+','+b+')';      // 正面纯白 → 侧面浅灰（参照图）
+      d.style.transform = 'translate(-50%,0) translateZ('+(-i*GAP).toFixed(2)+'px)';
+      if(i===0) d.style.textShadow = '0 0 10px rgba(255,255,255,.18)';
+      hen.appendChild(d);
+    }
+  })();
+
+  // ---- 「爱」：参照图的扁平投影——不挤出、不放大，只随光池浮现（贴近地面的阴影感）----
+  (function buildAi(){
+    ai.textContent = '爱';
+    ai.style.color = 'rgb(122,32,40)';          // 深暗红投影（参照图中爱为暗色剪影）
+    ai.style.textShadow = '0 0 14px rgba(224,16,34,.28)';
+    ai.style.opacity = '0';
+  })();
+
+  // ---- 丝线：严格参照图——9条、近平行（顶底同宽不扇形）、每条向下微右漂1%W、
+  //      自画面上缘直接垂下（无横杆）、亮白、最左两条更长垂到字左下方 ----
+  // [顶端x(×W), 末端x(×W), 额外加长px, 末端y(%H)] —— 末端y 贴合该处「恨」字顶缘+轻扎入
+  var MAP = [
+    [-0.119, -0.109,   0, 0.310],
+    [-0.093, -0.083,   0, 0.274],
+    [-0.070, -0.059,   0, 0.268],
+    [-0.055, -0.045,   0, 0.262],
+    [-0.016, -0.001,   0, 0.259],
+    [-0.001,  0.013,   0, 0.260],
+    [ 0.029,  0.041,   0, 0.309],
+    [ 0.041,  0.055,   0, 0.309],
+    [ 0.119,  0.128,   0, 0.352]
+  ];
+  var strands = [];
+  for(var m=0;m<MAP.length;m++){
+    strands.push({topX:MAP[m][0], botX:MAP[m][1], extra:MAP[m][2], ey:MAP[m][3]});
+  }
+
+  // 绘制丝线：无横杆、近平行、微右漂；末端逐条贴合「恨」字顶缘（左「忄」左高右低、
+  // 右「艮」左低右高的双峰结构），像参照图那样一缕缕系在字顶笔画上
+  function drawRopes(alpha, ay, angRad){
+    ctx.clearRect(0,0,W,H);
+    if(alpha <= 0) return;
+    var cx = W*0.497, topY = H*0.008;
+    var swing = Math.sin(angRad) * charW * 0.20;      // 钟摆横移
+    ctx.lineCap = 'round';
+    for(var s=0; s<strands.length; s++){
+      var st = strands[s];
+      var sx = cx + st.topX*W, sy = topY;
+      var ex = cx + st.botX*W + swing;
+      var ey = st.ey * H + st.extra;                  // 末端直接落在字顶缘（已含轻扎入）
+      ctx.strokeStyle = 'rgba(245,243,238,'+(0.92*alpha).toFixed(3)+')';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(ex,ey); ctx.stroke();
+    }
+  }
+
+  var done = false;
+  function finish(){
+    if(done) return; done = true;
+    intro.classList.add('gone');
+    setTimeout(function(){
+      if(intro.parentNode) intro.parentNode.removeChild(intro);
+      try{ localStorage.setItem(KEY,'1'); }catch(e){}
+    }, 950);
+  }
+  if(skip) skip.addEventListener('click', finish);
+
+  // 减动效：静态构图后快速揭开（同样不吊落，丝线严格系于恨顶缘）
+  if(reduce){
+    hen.style.transform = restTransform();
+    hen.style.opacity = 1;
+    drawRopes(1, 0, REST_Y*Math.PI/180);
+    beam.style.opacity = 1; halo.style.opacity = 1; spot.style.opacity = .9;
+    ai.style.transform = 'translate(-50%,-50%) rotateX(54deg) rotateZ(-38deg) scale(1)';
+    ai.style.opacity = 1;
+    setTimeout(finish, 1400);
+    return;
+  }
+
+  // 舞台灯：平滑曲线（无闪烁）；恨字静止、丝线自开场即系于其顶缘
+  var T0 = null;
+  function frame(now){
+    if(done) return;
+    if(T0 === null) T0 = now;
+    var el = now - T0;
+
+    // 恨字静止于最终姿态（无下放 / 无悬晃）
+    hen.style.transform = restTransform();
+    var ropeA = Math.min(1, el / ROPE_IN);
+    ropeA = ropeA*ropeA*(3-2*ropeA);              // smoothstep 淡入
+    hen.style.opacity = ropeA.toFixed(3);
+    drawRopes(ropeA, 0, REST_Y*Math.PI/180);       // 丝线末端已逐条贴合恨顶缘
+
+    // 光：自上方缓缓打下（不再闪烁）—— 光束随强度下压、地面光池稍后亮起
+    var L = 0, spotL = 0;
+    if(el >= lightStart){
+      var lp = (el - lightStart)/LIGHT; if(lp > 1) lp = 1;
+      L = lp*lp*(3-2*lp);                          // smoothstep 0→1
+      var sp = (lp - 0.28)/0.72; if(sp < 0) sp = 0; if(sp > 1) sp = 1;
+      spotL = sp*sp*(3-2*sp);
+    }
+    beam.style.opacity = L.toFixed(3);
+    beam.style.transform = 'translateX(-50%) translateY('+(-22*(1-L)).toFixed(2)+'%)';
+    halo.style.opacity = L.toFixed(3);
+    spot.style.opacity = (spotL*0.92).toFixed(3);
+
+    // 红「爱」：不放大、不挤出——随光池淡入成贴地投影（扁平，参照图）
+    if(el > shadowStart){
+      var a = Math.min(1, (el - shadowStart)/SHADOW);
+      var ease = a*a*(3-2*a);
+      ai.style.opacity = ease.toFixed(3);
+      ai.style.transform = 'translate(-50%,-50%) rotateX(54deg) rotateZ(-38deg) scale(1)';
+    }
+
+    if(el > total){ finish(); return; }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // 兜底：若 rAF 异常，强制揭开
+  setTimeout(finish, 6800);
+})();
+</script>
 
 </body>
 </html>
