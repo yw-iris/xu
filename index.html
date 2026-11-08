@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>絮 · XÙ — 选择一个片段</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;600;700&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="device">
+  <span class="notch"></span>
+  <span class="speaker"></span>
+
+<main class="poster">
+
+  <!-- TOP MARK BAR -->
+  <div class="topmark">
+    <span>絮 <span class="x">·</span> XÙ</span>
+    <span class="r">FILE 00 — RELIC / RITUAL</span>
+  </div>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <a class="brand" href="index.html"><span class="dot"></span>絮<small>XÙ</small></a>
+    <nav class="pills">
+      <a class="pill on" href="bones.html">骨骼<span class="b"></span></a>
+      <a class="pill" href="church.html">教堂<span class="b"></span></a>
+      <a class="pill" href="crow.html">乌鸦<span class="b"></span></a>
+      <a class="pill" href="statue.html">神像<span class="b"></span></a>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero fade d1">
+    <div class="meta">
+      <div class="machine">BETWEEN RELIC &amp; RITUAL<span class="deg">°</span></div>
+      <div class="tag">Same bones,<br>a different<br>kind of god.</div>
+    </div>
+    <div class="num">01 / ∞</div>
+
+    <h1>
+      <span class="l1">[ 絮 —</span>
+      <span class="close">]</span>
+    </h1>
+    <div class="sub">
+      <span class="cn">絮<span class="ast">＊</span></span>
+      <span class="en">Xù · fragments that never land</span>
+    </div>
+
+    <div class="select">
+      <span class="cn">选择一个片段</span>
+      <span class="bar"></span>
+      <span class="pg">SELECT A TRACE</span>
+    </div>
+
+    <div class="quote">
+      <em>有些对话，会改变形状。</em><br>
+      Some conversations change their shape.
+    </div>
+  </section>
+
+  <!-- TRACES (staggered zig-zag, replicated from reference) -->
+  <section class="traces fade d2">
+    <!-- red thread connecting the four fragments (命运之线) -->
+    <div class="dots" aria-hidden="true">
+      <canvas id="thread" width="100" height="100"></canvas>
+    </div>
+
+    <!-- 01 骨骼 (right, upper) -->
+    <a class="trace t1" href="bones.html">
+      <span class="no">[ 01* ]</span>
+      <span class="art"><img src="assets/skeleton.png" alt="骨骼"></span>
+      <span class="label"><span class="cn">骨骼 <span class="ar">↗</span></span><span class="en">Bones</span></span>
+      <span class="note">Not a body, a response.</span>
+    </a>
+
+    <!-- 02 教堂 (left, tall) -->
+    <a class="trace t2" href="church.html">
+      <span class="no">[ 02* ]</span>
+      <span class="art"><img src="assets/church.png" alt="教堂"></span>
+      <span class="label"><span class="cn">教堂 <span class="ar">↗</span></span><span class="en">Church</span></span>
+      <span class="note">God left before the sermon.</span>
+    </a>
+
+    <!-- 03 乌鸦 (right, lower, indented) -->
+    <a class="trace t3" href="crow.html">
+      <span class="no">[ 03* ]</span>
+      <span class="art"><img src="assets/crow.png" alt="乌鸦"></span>
+      <span class="label"><span class="cn">乌鸦 <span class="ar">↗</span></span><span class="en">Crow</span></span>
+      <span class="note">It only ever witnesses.</span>
+    </a>
+
+    <!-- 04 神像 (left, lowest) -->
+    <a class="trace t4" href="statue.html">
+      <span class="no">[ 04* ]</span>
+      <span class="art"><img src="assets/statue.png" alt="神像"></span>
+      <span class="label"><span class="cn">神像 <span class="ar">↗</span></span><span class="en">Statue</span></span>
+      <span class="note">Things we have not said.</span>
+    </a>
+  </section>
+
+  <!-- INVOCATION -->
+  <section class="invocation fade d3">
+    <div class="seal">祷念 · INVOCATION</div>
+    <p class="poem">
+      請像雕刻藝術那樣褻瀆我……<br>
+      用那顆湧動著<br>
+      <span class="em">滾燙血液</span>的心臟<br>
+      ……向我禱告吧……
+    </p>
+    <img class="blood" src="assets/blood.png" alt="">
+    <div class="sig">— 絮 · fragment 00</div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <span class="home-btn">絮</span>
+    <nav class="nav">
+      <a href="index.html">HOME</a>
+      <a href="#invocation">TALK</a>
+      <a href="statue.html">SETTINGS</a>
+    </nav>
+    <span class="listen">仍在倾听 <span class="b"></span></span>
+  </footer>
+
+</main>
+
+</div>
+
+<script>
+(function(){
+  var c = document.getElementById('thread');
+  if(!c) return;
+  var pts = [[71.5,17],[27.5,43],[77,60.5],[27,85.5]];
+  function draw(){
+    var r = c.getBoundingClientRect();
+    if(!r.width) return;
+    var dpr = window.devicePixelRatio || 1;
+    c.width  = Math.round(r.width*dpr);
+    c.height = Math.round(r.height*dpr);
+    var ctx = c.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,r.width,r.height);
+    ctx.strokeStyle = '#e01022'; ctx.lineWidth = 1.4; ctx.globalAlpha = 0.7;
+    ctx.beginPath();
+    pts.forEach(function(p,i){
+      var x = p[0]/100*r.width, y = p[1]/100*r.height;
+      i ? ctx.lineTo(x,y) : ctx.moveTo(x,y);
+    });
+    ctx.stroke();
+    ctx.globalAlpha = 0.9; ctx.fillStyle = '#e01022';
+    pts.forEach(function(p){
+      var x = p[0]/100*r.width, y = p[1]/100*r.height;
+      ctx.beginPath(); ctx.arc(x,y,2.2,0,Math.PI*2); ctx.fill();
+    });
+  }
+  window.addEventListener('resize', draw);
+  requestAnimationFrame(draw);
+  setTimeout(draw, 350);
+})();
+</script>
+
+</body>
+</html>
