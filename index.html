@@ -228,58 +228,92 @@
   var aiStart = fallEnd;             // 2750
   var total   = aiStart+AIIN+HOLD;   // 4550
 
-  // 字宽（用于把丝线系到「恨」上沿的多个点）
+  // ---- 立体字：「恨」多层沿 Z 轴堆叠挤出（正面亮白 → 背面渐暗）----
   var charW = 120;
-  function measure(){ charW = Math.max(90, parseFloat(getComputedStyle(hen).fontSize) * 1.04); }
+  function measure(){
+    var fs = parseFloat(getComputedStyle(hen).fontSize);
+    charW = Math.max(88, (fs || 120) * 1.04);
+  }
   measure(); addEventListener('resize', measure);
 
-  // 丝线：顶部窄束（像横杆聚集）→ 向下扇形散开，分别系在「恨」上沿不同点
-  // 多数为细白丝，混入少量红线交织（参照图以白为主，红线点缀）
-  var strands = [];
-  (function(){
-    var N = 9;
-    for(var i=0;i<N;i++){
-      var f = i/(N-1);                      // 0..1 横向分布
-      var botOx = (f-0.5) * charW * 0.86;   // 系在字上沿：左 / 中 / 右
-      var topOx = (f-0.5) * W * 0.085;      // 顶部窄束，几乎平行
-      var red = (i===2 || i===6);           // 少数红线，交织其中
-      var amp = 5 + (i%3)*4;                // 轻微弯曲，像悬丝
-      var phase = i*1.27;
-      var lenJ = ((i*53)%17)-8;             // 长短参差
-      strands.push({botOx:botOx, topOx:topOx, red:red, amp:amp, phase:phase, lenJ:lenJ});
+  (function buildLayers(){
+    var LAYERS = 30, GAP = 2.3;
+    var txt = (hen.textContent || '恨').trim();
+    hen.textContent = '';
+    for(var i=0;i<LAYERS;i++){
+      var d = document.createElement('div');
+      d.className = 'xl';
+      d.textContent = txt;
+      var t = i/(LAYERS-1);                          // 0 正面 → 1 背面
+      var r = Math.round(255-130*t), g = Math.round(254-132*t), b = Math.round(250-135*t);
+      d.style.color = 'rgb('+r+','+g+','+b+')';      // 正面纯白 → 侧面浅灰（参照图）
+      d.style.transform = 'translate(-50%,0) translateZ('+(-i*GAP).toFixed(2)+'px)';
+      if(i===0) d.style.textShadow = '0 0 16px rgba(255,255,255,.22)';
+      hen.appendChild(d);
+    }
+    // 「爱」同样立体挤出：红正面 → 暗红侧面
+    var atxt = (ai.textContent || '爱').trim();
+    ai.textContent = '';
+    var AL = 22, AGAP = 2.0;
+    for(var j=0;j<AL;j++){
+      var e = document.createElement('div');
+      e.className = 'xl';
+      e.textContent = atxt;
+      var u = j/(AL-1);
+      var cr = Math.round(228-146*u), cg = Math.round(18-8*u), cb = Math.round(36-16*u);
+      e.style.color = 'rgb('+cr+','+Math.max(0,cg)+','+Math.max(0,cb)+')';
+      e.style.transform = 'translate(-50%,-50%) translateZ('+(-j*AGAP).toFixed(2)+'px)';
+      if(j===0) e.style.textShadow = '0 0 34px rgba(224,16,34,.75),0 0 90px rgba(224,16,34,.4)';
+      ai.appendChild(e);
     }
   })();
 
+  // ---- 丝线：完全笔直，白红交织、彼此 X 形交叉 ----
+  // [顶部横杆锚点(×W*0.13), 系到字笔画上(×charW*0.46), 红色?]
+  var MAP = [
+    [-1.00,  0.92, false],   // 左顶 → 右系（大交叉）
+    [-0.55,  0.55, false],
+    [-0.80, -0.30, true ],   // 红丝斜穿
+    [-0.30, -0.75, false],
+    [-0.15, -0.10, false],
+    [ 0.00,  0.00, false],   // 中垂
+    [ 0.20,  0.15, false],
+    [ 0.30,  0.75, false],
+    [ 0.80,  0.30, true ],   // 红丝斜穿
+    [ 0.55, -0.55, false],
+    [ 1.00, -0.92, false]    // 右顶 → 左系（大交叉）
+  ];
+  var strands = [];
+  for(var m=0;m<MAP.length;m++){
+    strands.push({topX:MAP[m][0]*W*0.13, botX:MAP[m][1]*charW*0.46, red:MAP[m][2], lenJ:((m*53)%13)-6});
+  }
+
   function henTop(){ return H * 0.30; }
 
-  // 绘制丝线：顶部窄束 → 扇形系到字上沿多点（提线木偶式悬挂）
+  // 绘制丝线：顶部固定横杆 + 笔直细线交叉，系点扎进「恨」上沿笔画
   function drawRopes(alpha, ay, angRad){
     ctx.clearRect(0,0,W,H);
     if(alpha <= 0) return;
+    var cx = W/2, topY = H*0.035;
+    var swing = Math.sin(angRad) * charW * 0.20;      // 钟摆横移
+    // 顶部固定横杆
+    ctx.lineCap = 'butt';
+    ctx.strokeStyle = 'rgba(245,243,238,'+(0.20*alpha).toFixed(3)+')';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx - W*0.15, topY); ctx.lineTo(cx + W*0.15, topY); ctx.stroke();
+    // 笔直丝线（红线微微发光）
     ctx.lineCap = 'round';
-    var cx = W/2, topY = H*0.045, steps = 24;
-    var swing = Math.sin(angRad) * charW * 0.22;   // 钟摆横移
     for(var s=0; s<strands.length; s++){
       var st = strands[s];
       var col = st.red ? '224,16,34' : '245,243,238';
-      var sx = cx + st.topOx, sy = topY;
-      var ex = cx + st.botOx + swing, ey = ay - 4 + st.lenJ;
-      var px = null, py = null;
-      for(var k=0; k<=steps; k++){
-        var u = k/steps;
-        var bx = sx + (ex-sx)*u;
-        var by = sy + (ey-sy)*u;
-        var off = st.amp * Math.sin(u*Math.PI*1.5 + st.phase) * Math.sin(u*Math.PI); // 两端归零的弓形
-        var x = bx + off, y = by;
-        if(k>0){
-          var w = 0.55 + 0.55*u;                                  // 由细到略粗
-          var a = (0.30 + 0.50*u) * alpha * (st.red ? 0.92 : 0.62); // 近亮远淡
-          ctx.strokeStyle = 'rgba('+col+','+a.toFixed(3)+')';
-          ctx.lineWidth = w;
-          ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(x,y); ctx.stroke();
-        }
-        px = x; py = y;
-      }
+      var sx = cx + st.topX, sy = topY + 1;
+      var ex = cx + st.botX + swing;
+      var ey = ay + charW*0.16 + st.lenJ + st.botX * 0.12;   // 扎进字上沿笔画（em 框顶与墨迹有间隙）
+      if(st.red){ ctx.shadowColor = 'rgba(224,16,34,.55)'; ctx.shadowBlur = 6; }
+      ctx.strokeStyle = 'rgba('+col+','+((st.red?0.90:0.62)*alpha).toFixed(3)+')';
+      ctx.lineWidth = st.red ? 1.05 : 0.85;
+      ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(ex,ey); ctx.stroke();
+      ctx.shadowBlur = 0;
     }
   }
 
@@ -296,10 +330,10 @@
 
   // 减动效：静态构图后快速揭开
   if(reduce){
-    hen.style.transform = 'translate(-50%,0) rotateZ(-6deg)';
-    drawRopes(1, henTop(), 0);
+    hen.style.transform = 'translateY(0) rotateZ(-6deg) rotateY(-15deg) rotateX(5deg)';
+    drawRopes(1, henTop(), -15*Math.PI/180);
     ai.style.opacity = 1; spot.style.opacity = .9;
-    ai.style.transform = 'translate(-50%,-50%) scale(1)';
+    ai.style.transform = 'rotateX(48deg) scale(1)';
     setTimeout(finish, 1400);
     return;
   }
@@ -314,26 +348,26 @@
 
     if(el < SWING){
       var p = el/SWING;
-      ang = Math.sin(el/1000 * 2.4) * 8 * (1 - p*0.25);  // 3D 钟摆（绕 Y）
-      rx  = Math.sin(el/1000 * 2.4) * 3;
+      ang = -15 + Math.sin(el/1000 * 2.4) * 6 * (1 - p*0.25);  // 带基础偏转的 3D 钟摆（露出侧面厚度）
+      rx  = 5 + Math.sin(el/1000 * 2.4) * 2.5;
     } else if(el < fallEnd){
       var f = (el - SWING)/FALL;                         // 0..1
       var e = f*f;                                       // 重力加速
       ty  = e * (H*0.98);
-      ang = 8 + f*30;                                    // 坠落翻滚
-      rx  = f*42;
+      ang = -9 + f*38;                                   // 坠落翻滚
+      rx  = 5 + f*40;
       ropeAlpha = Math.max(0, 1 - f*7);                  // 丝线骤断
     } else {
-      ty = H*0.98; ang = 42; rx = 46; ropeAlpha = 0;
+      ty = H*0.98; ang = 29; rx = 45; ropeAlpha = 0;
     }
-    hen.style.transform = 'translate(-50%,'+ty.toFixed(1)+'px) rotateZ(-6deg) rotateY('+ang.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
+    hen.style.transform = 'translateY('+ty.toFixed(1)+'px) rotateZ(-6deg) rotateY('+ang.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
     drawRopes(ropeAlpha, ay0 + ty, ang * Math.PI/180);
 
     if(el > aiStart){
       var a = Math.min(1, (el - aiStart)/AIIN);
       ai.style.opacity = a;
       spot.style.opacity = (a*0.9).toFixed(3);
-      ai.style.transform = 'translate(-50%,-50%) scale('+(1.08 - 0.08*a).toFixed(3)+')';
+      ai.style.transform = 'rotateX(48deg) scale('+(1.08 - 0.08*a).toFixed(3)+')';
     }
 
     if(el > total){ finish(); return; }
