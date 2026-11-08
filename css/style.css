@@ -306,19 +306,20 @@ a{color:inherit;text-decoration:none;}
 
 /* ============ DETAIL PAGE — black-red swirl backdrop + water ripple ============ */
 .wrap.detail{position:relative;z-index:3;padding-top:4px;overflow:hidden;}
+.detail-text{position:relative;margin-top:10px;overflow:hidden;border-radius:8px;}
 .detail-bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:#08080a;}
 .detail-bg img{
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-  filter:grayscale(1) brightness(.42) contrast(1.12);opacity:.55;mix-blend-mode:luminosity;
+  filter:grayscale(1) brightness(.40) contrast(1.14);opacity:.62;mix-blend-mode:luminosity;
 }
 .detail-bg::after{
-  content:"";position:absolute;inset:0;
+  content:"";position:absolute;inset:0;z-index:1;
   background:
-    radial-gradient(120% 70% at 50% -10%, rgba(196,22,32,.34), transparent 58%),
-    linear-gradient(180deg, rgba(8,8,10,.50), rgba(8,8,10,.80));
+    radial-gradient(120% 60% at 50% 0%, rgba(196,22,32,.30), transparent 55%),
+    linear-gradient(180deg, rgba(8,8,10,.42), rgba(8,8,10,.78));
 }
-.detail-bg .ripple{position:absolute;inset:0;width:100%;height:100%;}
-.detail > *:not(.detail-bg){position:relative;z-index:1;}
+.detail-bg .ripple{position:absolute;inset:0;z-index:2;width:100%;height:100%;}
+.detail-text > *:not(.detail-bg){position:relative;z-index:3;}
 /* keep text legible over the moving water */
 .detail .bodytext p{text-shadow:0 1px 16px rgba(0,0,0,.6);}
 .detail .head .no{font-size:clamp(24px,6.4vw,32px);}
