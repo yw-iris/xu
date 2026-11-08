@@ -338,6 +338,21 @@ a{color:inherit;text-decoration:none;}
   .pills{flex-direction:row;flex-wrap:wrap;justify-content:flex-end;}
 }
 
+/* 手机端（外框随视口收窄，卡片更窄）：标签竖排，中英文名不再争抢横向宽度，
+   确保任何屏宽下文字都不被边框裁切 / 出框 */
+@media (max-width:480px){
+  .trace{padding:12px 10px 11px;}
+  .trace .label{
+    flex-direction:column;align-items:flex-start;justify-content:flex-start;
+    gap:2px;padding-top:8px;flex-wrap:nowrap;
+  }
+  .trace .label .cn{font-size:13px;letter-spacing:.10em;}
+  .trace .label .cn .enter{font-size:10px;}
+  .trace .label .en{flex-shrink:0;}
+  .trace .note{margin-top:7px;font-size:9.5px;}
+  .trace .art{margin:6px 0 8px;min-height:42px;}
+}
+
 /* entrance */
 .fade{opacity:0;transform:translateY(16px);animation:rise .8s var(--ease) forwards;}
 @keyframes rise{to{opacity:1;transform:none;}}
