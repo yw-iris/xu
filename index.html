@@ -28,7 +28,7 @@
     <div class="sins-title">细数我的罪 …</div>
 
     <!-- 红线交互提示：置于标题下、卡片之上的醒目位置（非页底） -->
-    <p class="link-hint" id="linkHint"><b>长按</b>任意碎片 · 牵引<b>红线</b> · 串联其它记忆<span class="hint-sub">（可任意多重连接）</span></p>
+    <p class="link-hint" id="linkHint"><b>长按</b>任意碎片，待<b>红边框变粗</b>，延伸红线链接其它模块<span class="hint-sub">（可任意多重连接）</span></p>
 
     <div class="traces" id="traces">
       <!-- 红线画在卡片之下（z-index 低于卡片），只从卡片间的缝隙透出，绝不遮挡卡片上层 -->
@@ -100,7 +100,8 @@
 
   var links = [];        // 已连成的红线 {a, b}
   var drag  = null;      // 当前正在牵引 {from, x, y, over}
-  var LONGPRESS = 320;   // 长按触发毫秒
+  var CHARGE = 650;      // 长按蓄力毫秒：红边框在此期间逐渐变粗
+  var LONGPRESS = CHARGE;
   var MOVE_T    = 8;     // 移动阈值（px），超过即视为拖拽
   var timer = null, srcIdx = -1, sx = 0, sy = 0, linking = false, justDragged = false;
 
@@ -168,6 +169,7 @@
     linking = true;
     var w = wrapRect();
     drag = { from:srcIdx, x:x-w.left, y:y-w.top, over:-1 };
+    cards[srcIdx].classList.remove('charging');
     cards[srcIdx].classList.add('linking');
   }
   function beginLink(){ startLink(sx, sy); }
@@ -177,9 +179,9 @@
       var over = drag ? drag.over : -1;
       if(over >= 0 && !pairExists(drag.from, over)){
         links.push({ a:drag.from, b:over });
-        if(hint) hint.innerHTML = '已连 <b>'+links.length+'</b> 条命运之线 · 继续长按串联其它记忆';
+        if(hint) hint.innerHTML = '已连 <b>'+links.length+'</b> 条命运之线 · 长按其它碎片继续串联';
       }
-      cards.forEach(function(c){ c.classList.remove('linking','link-target'); });
+      cards.forEach(function(c){ c.classList.remove('linking','link-target','charging'); });
       drag = null; linking = false; justDragged = true;
       setTimeout(function(){ justDragged = false; }, 0);
       draw();
@@ -192,6 +194,8 @@
     el.addEventListener('pointerdown', function(e){
       e.preventDefault();          // 阻止 <a> 原生拖拽 / 文本选择，避免 pointercancel 打断连线
       srcIdx = i; sx = e.clientX; sy = e.clientY; linking = false;
+      el.style.setProperty('--charge-dur', CHARGE + 'ms');
+      el.classList.add('charging');   // 红边框开始逐渐变粗（蓄力）
       timer = setTimeout(beginLink, LONGPRESS);
     });
     el.addEventListener('dragstart', function(e){ e.preventDefault(); });
@@ -203,9 +207,12 @@
 
   window.addEventListener('pointermove', function(e){
     if(srcIdx < 0) return;
-    // 长按未触发前，移动视为滚动 —— 取消长按，不启动连线（保留页面滚动）
+    // 长按未触发前，移动视为滚动 —— 取消长按 + 移除蓄力态，不启动连线（保留页面滚动）
     if(!linking){
-      if(Math.hypot(e.clientX-sx, e.clientY-sy) > MOVE_T) clearTimeout(timer);
+      if(Math.hypot(e.clientX-sx, e.clientY-sy) > MOVE_T){
+        clearTimeout(timer);
+        if(cards[srcIdx]) cards[srcIdx].classList.remove('charging');
+      }
       return;
     }
     var w = wrapRect();
