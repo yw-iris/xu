@@ -312,7 +312,7 @@
 
   // 减动效：静态构图后快速揭开
   if(reduce){
-    hen.style.transform = 'translateY(0) rotateZ(-6deg) rotateY(-18deg) rotateX(8deg)';
+    hen.style.transform = 'translateY(0) rotateZ(22deg) rotateY(-18deg) rotateX(8deg)';
     drawRopes(1, henTop(), -18*Math.PI/180);
     beam.style.opacity = 1; halo.style.opacity = 1; spot.style.opacity = .9;
     ai.style.opacity = 1;
@@ -356,7 +356,7 @@
       ang = -18 + Math.sin(r2*2.2) * 2.5;
       rx  = 8 + Math.sin(r2*2.2) * 1.0;
     }
-    hen.style.transform = 'translateY('+ty.toFixed(1)+'px) rotateZ(-6deg) rotateY('+ang.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
+    hen.style.transform = 'translateY('+ty.toFixed(1)+'px) rotateZ(22deg) rotateY('+ang.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
     drawRopes(1, ay0 + ty, ang * Math.PI/180);
 
     // 光：灯闪烁亮起 → 稳定（光束、恨身柔光、地面光池同步）
@@ -376,7 +376,7 @@
       ai.style.filter = 'blur('+((1-ease)*13).toFixed(1)+'px)';
       var s = 1.22 - 0.22*ease;
       var dy = -14 * (1-ease);
-      ai.style.transform = 'rotateX(30deg) scale('+s.toFixed(3)+') translateY('+dy.toFixed(1)+'px)';
+      ai.style.transform = 'rotateX(28deg) rotateZ(-16deg) scale('+s.toFixed(3)+') translateY('+dy.toFixed(1)+'px)';
     }
 
     if(el > total){ finish(); return; }
