@@ -203,7 +203,7 @@
   if(!intro) return;
   var KEY = 'xu_intro_v3';
   var force = /[?&]intro\b/.test(location.search);
-  if(!force && sessionStorage.getItem(KEY)){ intro.parentNode.removeChild(intro); return; }
+  if(!force && localStorage.getItem(KEY)){ intro.parentNode.removeChild(intro); return; }
 
   var canvas = document.getElementById('ropes');
   var ctx = canvas.getContext('2d');
@@ -315,7 +315,7 @@
     intro.classList.add('gone');
     setTimeout(function(){
       if(intro.parentNode) intro.parentNode.removeChild(intro);
-      try{ sessionStorage.setItem(KEY,'1'); }catch(e){}
+      try{ localStorage.setItem(KEY,'1'); }catch(e){}
     }, 950);
   }
   if(skip) skip.addEventListener('click', finish);
