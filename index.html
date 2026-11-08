@@ -228,35 +228,52 @@
   var aiStart = fallEnd;             // 2750
   var total   = aiStart+AIIN+HOLD;   // 4550
 
-  // 交织的丝线：白 + 红，长短参差、相位不同 → 相互交错
+  // 字宽（用于把丝线系到「恨」上沿的多个点）
+  var charW = 120;
+  function measure(){ charW = Math.max(90, parseFloat(getComputedStyle(hen).fontSize) * 1.04); }
+  measure(); addEventListener('resize', measure);
+
+  // 丝线：顶部窄束（像横杆聚集）→ 向下扇形散开，分别系在「恨」上沿不同点
+  // 多数为细白丝，混入少量红线交织（参照图以白为主，红线点缀）
   var strands = [];
-  [[-92,4.0,22,false],[-64,5.0,26,false],[-40,3.4,30,true],[-16,4.6,20,false],
-   [8,5.2,24,false],[30,3.8,28,true],[54,4.2,22,false],[78,5.0,26,false],
-   [-52,6.0,18,true],[66,3.2,30,false]].forEach(function(c,i){
-    strands.push({ox:c[0], freq:c[1], amp:c[2], red:c[3], phase:i*1.7});
-  });
+  (function(){
+    var N = 9;
+    for(var i=0;i<N;i++){
+      var f = i/(N-1);                      // 0..1 横向分布
+      var botOx = (f-0.5) * charW * 0.86;   // 系在字上沿：左 / 中 / 右
+      var topOx = (f-0.5) * W * 0.085;      // 顶部窄束，几乎平行
+      var red = (i===2 || i===6);           // 少数红线，交织其中
+      var amp = 5 + (i%3)*4;                // 轻微弯曲，像悬丝
+      var phase = i*1.27;
+      var lenJ = ((i*53)%17)-8;             // 长短参差
+      strands.push({botOx:botOx, topOx:topOx, red:red, amp:amp, phase:phase, lenJ:lenJ});
+    }
+  })();
 
   function henTop(){ return H * 0.30; }
 
-  // 绘制丝线：顶部散开 → 汇聚到字，近大远小、近亮远暗（立体感）
-  function drawRopes(alpha, ax, ay){
+  // 绘制丝线：顶部窄束 → 扇形系到字上沿多点（提线木偶式悬挂）
+  function drawRopes(alpha, ay, angRad){
     ctx.clearRect(0,0,W,H);
     if(alpha <= 0) return;
     ctx.lineCap = 'round';
-    var cx = W/2, steps = 30;
+    var cx = W/2, topY = H*0.045, steps = 24;
+    var swing = Math.sin(angRad) * charW * 0.22;   // 钟摆横移
     for(var s=0; s<strands.length; s++){
       var st = strands[s];
       var col = st.red ? '224,16,34' : '245,243,238';
+      var sx = cx + st.topOx, sy = topY;
+      var ex = cx + st.botOx + swing, ey = ay - 4 + st.lenJ;
       var px = null, py = null;
       for(var k=0; k<=steps; k++){
         var u = k/steps;
-        var bx = cx + st.ox*(1-u) + (ax-cx)*u;        // 顶部分散 → 底部汇于字
-        var by = ay * u;
-        var off = st.amp * Math.sin(u*st.freq*Math.PI + st.phase) * u; // 越往下越张开、彼此交错
+        var bx = sx + (ex-sx)*u;
+        var by = sy + (ey-sy)*u;
+        var off = st.amp * Math.sin(u*Math.PI*1.5 + st.phase) * Math.sin(u*Math.PI); // 两端归零的弓形
         var x = bx + off, y = by;
         if(k>0){
-          var w = 0.5 + 1.5*u;                                    // 近粗远细
-          var a = (0.16 + 0.62*u) * alpha * (st.red ? 0.95 : 0.66); // 近亮远淡
+          var w = 0.55 + 0.55*u;                                  // 由细到略粗
+          var a = (0.30 + 0.50*u) * alpha * (st.red ? 0.92 : 0.62); // 近亮远淡
           ctx.strokeStyle = 'rgba('+col+','+a.toFixed(3)+')';
           ctx.lineWidth = w;
           ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(x,y); ctx.stroke();
@@ -279,8 +296,8 @@
 
   // 减动效：静态构图后快速揭开
   if(reduce){
-    hen.style.transform = 'translate(-50%,0) rotateY(0deg)';
-    drawRopes(1, W/2, henTop());
+    hen.style.transform = 'translate(-50%,0) rotateZ(-6deg)';
+    drawRopes(1, henTop(), 0);
     ai.style.opacity = 1; spot.style.opacity = .9;
     ai.style.transform = 'translate(-50%,-50%) scale(1)';
     setTimeout(finish, 1400);
@@ -297,20 +314,20 @@
 
     if(el < SWING){
       var p = el/SWING;
-      ang = Math.sin(el/1000 * 2.4) * 9 * (1 - p*0.25);  // 3D 钟摆（绕 Y）
+      ang = Math.sin(el/1000 * 2.4) * 8 * (1 - p*0.25);  // 3D 钟摆（绕 Y）
       rx  = Math.sin(el/1000 * 2.4) * 3;
     } else if(el < fallEnd){
       var f = (el - SWING)/FALL;                         // 0..1
       var e = f*f;                                       // 重力加速
       ty  = e * (H*0.98);
-      ang = 9 + f*30;                                    // 坠落翻滚
+      ang = 8 + f*30;                                    // 坠落翻滚
       rx  = f*42;
       ropeAlpha = Math.max(0, 1 - f*7);                  // 丝线骤断
     } else {
       ty = H*0.98; ang = 42; rx = 46; ropeAlpha = 0;
     }
-    hen.style.transform = 'translate(-50%,'+ty.toFixed(1)+'px) rotateY('+ang.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
-    drawRopes(ropeAlpha, cx, ay0 + ty);
+    hen.style.transform = 'translate(-50%,'+ty.toFixed(1)+'px) rotateZ(-6deg) rotateY('+ang.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
+    drawRopes(ropeAlpha, ay0 + ty, ang * Math.PI/180);
 
     if(el > aiStart){
       var a = Math.min(1, (el - aiStart)/AIIN);
