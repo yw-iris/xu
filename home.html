@@ -124,10 +124,10 @@
 
   // 时间线 (ms)：整组（恨 + 丝线）自上方坠下、由无到有 → 灯亮 → 红「爱」阴影浮现 → 停留
   // 丝线仍严格系于「恨」顶缘（逐条贴合、轻扎入），但整组作为一体从画面上方落下出现。
-  var DROP = 1150, LIGHT = 1000, SHADOW = 1100, HOLD = 1500;
+  var DROP = 2100, LIGHT = 1000, SHADOW = 1100, HOLD = 1500;
   var lightStart  = DROP;                          // 灯在整组落定后亮起
-  var shadowStart = lightStart + LIGHT;            // 2150
-  var total = shadowStart + SHADOW + HOLD;         // ~4750
+  var shadowStart = lightStart + LIGHT;            // 3100
+  var total = shadowStart + SHADOW + HOLD;         // ~5600
 
   // 恨字静止姿态（与丝线连接点标定一致）
   var REST_Z = -20, REST_Y = 12, REST_X = 8;
@@ -283,9 +283,10 @@
     if(T0 === null) T0 = now;
     var el = now - T0;
 
-    // —— 整组下落入场：恨 + 丝线作为一体从画面上方坠下、由无到有 ——
+    // —— 整组下落入场：恨 + 丝线作为一体从画面上方缓缓坠下、由无到有 ——
     var drop = Math.min(1, el / DROP);
-    var de   = drop*drop*(3-2*drop);               // smoothstep
+    // 缓入缓出（quad）：慢起、加速、柔落，呈现“被放下”的重力感
+    var de   = drop < 0.5 ? 2*drop*drop : 1 - Math.pow(-2*drop+2, 2)/2;
     var shift = (1 - de);                          // 1→0 落定
     var visA  = Math.min(1, de*1.5);               // 透明度（略快于位移）
     // 恨：在最终静止姿态上叠加自上方落下的整视口位移
@@ -322,8 +323,8 @@
   }
   requestAnimationFrame(frame);
 
-  // 兜底：若 rAF 异常，强制揭开
-  setTimeout(finish, 6800);
+  // 兜底：若 rAF 异常，强制揭开（需晚于整条时间线 total≈5600）
+  setTimeout(finish, 8200);
 })();
 </script>
 
