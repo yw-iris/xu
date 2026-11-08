@@ -13,9 +13,9 @@
 
 <!-- ============ 开场动画（立体）：恨被丝线吊下 → 光打在恨上 → 投影出红「爱」的阴影 ============ -->
 <div class="intro" id="intro" aria-hidden="true">
+  <canvas id="ropes"></canvas>
   <div class="scene">
     <div class="stage" id="stage">
-      <canvas id="ropes"></canvas>
       <div class="beam" id="beam"></div>
       <div class="halo" id="halo"></div>
       <div class="spot" id="spot"></div>
@@ -249,50 +249,44 @@
     ai.style.opacity = '0';
   })();
 
-  // ---- 丝线：纯白、自顶部居中垂下，近平行、略扇形张开（参照图：无红线、无交叉网）----
-  // [顶部横杆锚点(×W*0.13), 系到字笔画上(×charW*0.46), 红色?]
+  // ---- 丝线：严格参照图——9条、近平行（顶底同宽不扇形）、每条向下微右漂1%W、
+  //      自画面上缘直接垂下（无横杆）、亮白、最左两条更长垂到字左下方 ----
+  // [顶端x(×W偏移), 底端x(×W偏移), 额外长度px]
   var MAP = [
-    [-0.45, -0.50, false],
-    [-0.28, -0.32, false],
-    [-0.13, -0.16, false],
-    [ 0.00,  0.00, false],
-    [ 0.13,  0.16, false],
-    [ 0.28,  0.32, false],
-    [ 0.45,  0.50, false]
+    [-0.119, -0.109, 150],
+    [-0.093, -0.083, 140],
+    [-0.070, -0.059,   0],
+    [-0.055, -0.045,   0],
+    [-0.016, -0.001,   0],
+    [-0.001,  0.013,   0],
+    [ 0.029,  0.041,   0],
+    [ 0.041,  0.055,   0],
+    [ 0.119,  0.128,   0]
   ];
   var strands = [];
   for(var m=0;m<MAP.length;m++){
-    strands.push({topX:MAP[m][0]*W*0.13, botX:MAP[m][1]*charW*0.34, red:MAP[m][2], lenJ:((m*53)%13)-6});
+    strands.push({topX:MAP[m][0], botX:MAP[m][1], extra:MAP[m][2]});
   }
 
   function henTop(){ return H * 0.30; }
   // 下放起点：字完全隐没在视口上方（看不到的上面）
   function startY(){ return -(henTop() + charW*1.6); }
 
-  // 绘制丝线：顶部固定横杆 + 笔直细线交叉，系点扎进「恨」上沿笔画
+  // 绘制丝线：无横杆、近平行、微右漂，端点扎进「恨」上沿（字盖住线，呈现被吊起）
   function drawRopes(alpha, ay, angRad){
     ctx.clearRect(0,0,W,H);
     if(alpha <= 0) return;
-    var cx = W*0.53, topY = H*0.012;
+    var cx = W*0.497, topY = H*0.008;
     var swing = Math.sin(angRad) * charW * 0.20;      // 钟摆横移
-    // 顶部固定横杆（贴画面上缘）
-    ctx.lineCap = 'butt';
-    ctx.strokeStyle = 'rgba(245,243,238,'+(0.20*alpha).toFixed(3)+')';
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(cx - W*0.09, topY); ctx.lineTo(cx + W*0.09, topY); ctx.stroke();
-    // 笔直丝线（红线微微发光）
     ctx.lineCap = 'round';
     for(var s=0; s<strands.length; s++){
       var st = strands[s];
-      var col = st.red ? '224,16,34' : '245,243,238';
-      var sx = cx + st.topX, sy = topY + 1;
-      var ex = cx + st.botX + swing;
-      var ey = ay + charW*0.42 + st.lenJ + st.botX * 0.10;   // 扎进字上半部（字盖住线，呈现被吊起）
-      if(st.red){ ctx.shadowColor = 'rgba(224,16,34,.55)'; ctx.shadowBlur = 6; }
-      ctx.strokeStyle = 'rgba('+col+','+((st.red?0.90:0.62)*alpha).toFixed(3)+')';
-      ctx.lineWidth = st.red ? 1.05 : 0.85;
+      var sx = cx + st.topX*W, sy = topY;
+      var ex = cx + st.botX*W + swing;
+      var ey = ay - charW*0.08 + st.extra;            // 普通线止于字上沿，左两条垂过字左侧
+      ctx.strokeStyle = 'rgba(245,243,238,'+(0.92*alpha).toFixed(3)+')';
+      ctx.lineWidth = 1.3;
       ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(ex,ey); ctx.stroke();
-      ctx.shadowBlur = 0;
     }
   }
 
@@ -310,7 +304,7 @@
   // 减动效：静态构图后快速揭开
   if(reduce){
     hen.style.transform = 'translateY(0) rotateZ(-15deg) rotateY(12deg) rotateX(8deg)';
-    drawRopes(1, henTop(), -18*Math.PI/180);
+    drawRopes(1, henTop(), 12*Math.PI/180);
     beam.style.opacity = 1; halo.style.opacity = 1; spot.style.opacity = .9;
     ai.style.transform = 'translate(-50%,-50%) rotateX(54deg) rotateZ(-38deg) scale(1)';
     ai.style.opacity = 1;
