@@ -135,11 +135,12 @@
     return 'translateY('+((dy==null?0:dy))+'px) rotateZ('+REST_Z+'deg) rotateY('+REST_Y+'deg) rotateX('+REST_X+'deg)';
   }
 
-  // 初始：整组（恨 + 丝线）隐藏于画面上方——由无到有地坠下，避免开场闪现
+  // 初始：整组（恨 + 丝线）隐藏于画面上方——由无到有地坠下，避免开场闪现。
+  // 画布与「恨」用完全相同的位移（-100%*shift = -H*shift）同步下落，全程锁死不漂移。
   hen.style.opacity = '0';
   hen.style.transform = restTransform(-H);          // 上移整整一个视口高度
   canvas.style.opacity = '0';
-  canvas.style.transform = 'translateY(-118%)';
+  canvas.style.transform = 'translateY(-100%)';
 
   // ---- 立体字：「恨」多层沿 Z 轴堆叠挤出（正面亮白 → 侧面浅灰），厚度随字号自适应 ----
   var charW = 60;
@@ -175,79 +176,116 @@
     ai.style.opacity = '0';
   })();
 
-  // ---- 丝线：严格参照图——9条、近平行（顶底同宽不扇形）、每条向下微右漂1%W、
-  //      自画面上缘直接垂下（无横杆）、亮白、最左两条更长垂到字左下方 ----
-  // [顶端x(×W), 末端x(×W), 额外加长px, 末端y(%H), 深度z(0远→1近)] —— 末端y 贴合该处「恨」字顶缘+轻扎入
-  var MAP = [
-    [-0.119, -0.109,   0, 0.310, 0.22],
-    [-0.093, -0.083,   0, 0.274, 0.55],
-    [-0.070, -0.059,   0, 0.268, 0.88],
-    [-0.055, -0.045,   0, 0.262, 0.40],
-    [-0.016, -0.001,   0, 0.259, 1.00],
-    [-0.001,  0.013,   0, 0.260, 0.72],
-    [ 0.029,  0.041,   0, 0.309, 0.50],
-    [ 0.041,  0.055,   0, 0.309, 0.30],
-    [ 0.119,  0.128,   0, 0.352, 0.82]
-  ];
+  // ---- 丝线：9 条、近平行、自画面上缘直接垂下、亮白；末端不再写死屏幕坐标，
+  //      而是运行时吸附到「恨」字渲染后的真实顶缘（见 computeAnchor），牢牢系进顶笔画 ----
+  // frac：沿字宽方向的位置系数(-0.5左→0.5右)；z：深度(0远→1近)，决定亮度/粗细/辉光
+  var FRAC = [-0.46,-0.36,-0.25,-0.15,-0.02, 0.10, 0.22, 0.34, 0.46];
+  var ZD   = [ 0.22, 0.55, 0.88, 0.40, 1.00, 0.72, 0.50, 0.30, 0.82];
   var strands = [];
-  for(var m=0;m<MAP.length;m++){
-    strands.push({topX:MAP[m][0], botX:MAP[m][1], extra:MAP[m][2], ey:MAP[m][3], z:MAP[m][4]});
+  for(var m=0;m<FRAC.length;m++){
+    strands.push({frac:FRAC[m], z:ZD[m]});
   }
 
-  // 绘制丝线（立体）：无横杆、近平行、微右漂；每条按深度 z 分层——
-  // 近处更亮更粗带辉光、远处更淡更虚；末端系结高光 + 落在「恨」笔画上的投影，
-  // 像参照图那样一缕缕悬在不同纵深、扎进立体字顶笔画
-  function drawRopes(alpha, ay, angRad){
+  // 「恨」字真实几何（静止姿态下、最前层 .xl 的轴对齐包围盒 + 顶边斜率）。
+  // 每帧绘制时，线末端据此锁定到字的真实顶缘，无论字号 / 旋转如何都牢牢咬合。
+  // 用最前层 .xl（带字形实体的真实面）测包围盒，避免父级 absolute 无内容导致 0 尺寸。
+  var gChar = {cx:W*0.45, top:H*0.22, w:W*0.42, h:H*0.30, slope:Math.tan(REST_Z*Math.PI/180)*0.9};
+  function computeAnchor(){
+    var face = hen.querySelector('.xl');
+    if(!face) return;
+    var prevT = hen.style.transform, prevO = hen.style.opacity;
+    hen.style.transform = restTransform(0);   // 临时回到静止姿态读取真实 bbox
+    hen.style.opacity   = '1';
+    var r = face.getBoundingClientRect();
+    hen.style.transform = prevT; hen.style.opacity = prevO;
+    if(r && r.width > 0){
+      gChar.cx  = r.left + r.width/2;
+      gChar.top = r.top;
+      gChar.w   = r.width;
+      gChar.h   = r.height;
+      // 顶边斜率随 3D 旋转近似（Z 旋转主导屏幕倾角），让节点沿倾斜顶边分布而非水平排
+      gChar.slope = Math.tan(REST_Z*Math.PI/180) * 0.92;
+    }
+  }
+  computeAnchor();
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(computeAnchor); }
+  addEventListener('resize', computeAnchor);
+
+  // 绘制丝线（立体）：无横杆、近平行、自上方垂下；末端严格吸附到「恨」字真实顶缘，
+  // 每条按深度 z 分层（近亮远淡、近粗远细、带辉光），并在节点处加「横向小结 + 扎入字内淡出」，
+  // 让丝线像被牢牢系进立体字的顶笔画（sw 为整组微摆横移，首末同步保持节点锁定）
+  function drawRopes(alpha, sw){
     ctx.clearRect(0,0,W,H);
     if(alpha <= 0) return;
-    var cx = W*0.497, topY = H*0.008;
-    var swing = Math.sin(angRad) * charW * 0.20;      // 钟摆横移
+    var topY = H*0.006;
+    var cx = gChar.cx, gy = gChar.top, slope = gChar.slope, halfW = gChar.w*0.5;
+    var dip = Math.max(10, gChar.h*0.11);             // 扎入字内的长度（随字号缩放）
     ctx.lineCap = 'round';
 
-    // —— 投影层：每条线在「恨」笔画上投下淡影（光来自左上），制造“系在立体字前”的空间 ——
+    // —— 投影层：线落在「恨」笔画上的淡影（光来自左上），制造“系在立体字前”的空间 ——
     for(var s=0; s<strands.length; s++){
       var st = strands[s];
-      var sx = cx + st.topX*W, sy = topY;
-      var ex = cx + st.botX*W + swing, ey = st.ey*H + st.extra;
+      var ex = cx + st.frac*halfW + sw;
+      // 节点锚到“可见粗亮笔画顶”（约 em 顶下 0.17h），并钳制在该区内，确保白结压在字上而非上方留白
+      var ey = Math.min(gy + 0.50*gChar.h, Math.max(gy + 0.10*gChar.h, gy + 0.17*gChar.h + slope*(ex - cx)));
+      var sx = cx + st.frac*halfW*0.5 + sw;           // 顶端更窄，呈近平行垂落
       var sh = (0.10 + 0.12*(1-st.z)) * alpha;
       ctx.strokeStyle = 'rgba(0,0,0,'+sh.toFixed(3)+')';
-      ctx.lineWidth = 2.4;
+      ctx.lineWidth = 2.2;
       ctx.beginPath();
-      ctx.moveTo(sx + 2, sy);
-      ctx.lineTo(ex + 2.2, ey + 3.2);                 // 落影略偏右下
+      ctx.moveTo(sx + 1.5, topY);
+      ctx.lineTo(ex + 1.8, ey + 2.2);                 // 落影略偏右下
       ctx.stroke();
     }
 
-    // —— 发光线芯：按深度分层，近亮远淡、近粗远细，末段带轻微张力弧度 ——
+    // —— 发光线芯 + 扎入段：亮白垂下到节点，再没入字内一小段淡出（像被系进笔画）——
     for(var s=0; s<strands.length; s++){
       var st = strands[s];
-      var sx = cx + st.topX*W, sy = topY;
-      var ex = cx + st.botX*W + swing, ey = st.ey*H + st.extra;
-      var ca = (0.52 + 0.43*st.z) * alpha;            // 近处更亮
+      var ex = cx + st.frac*halfW + sw;
+      var ey = Math.min(gy + 0.50*gChar.h, Math.max(gy + 0.10*gChar.h, gy + 0.17*gChar.h + slope*(ex - cx)));
+      var sx = cx + st.frac*halfW*0.5 + sw;
+      var ca = (0.55 + 0.40*st.z) * alpha;            // 近处更亮
       ctx.strokeStyle = 'rgba(248,246,241,'+ca.toFixed(3)+')';
-      ctx.lineWidth = 0.85 + 0.85*st.z;               // 近处更粗
+      ctx.lineWidth = 0.85 + 0.95*st.z;               // 近处更粗
       ctx.shadowColor = 'rgba(245,243,238,'+(0.55*st.z).toFixed(3)+')';
       ctx.shadowBlur = 1 + 5*st.z;
-      var mx=(sx+ex)/2, my=(sy+ey)/2;
-      var bow = (ex-sx)*0.10 + (st.z-0.5)*7;          // 末段张力弧（向一侧弯）
+      var mx=(sx+ex)/2, my=(topY+ey)/2;
       ctx.beginPath();
-      ctx.moveTo(sx, sy);
-      ctx.quadraticCurveTo(mx + bow, my - 6, ex, ey);
+      ctx.moveTo(sx, topY);
+      ctx.quadraticCurveTo(mx, my - 5, ex, ey);       // 末段轻微张力弧
       ctx.stroke();
+      // 扎入字内：自节点继续向下没入笔画并淡出
+      ctx.shadowBlur = 0;
+      var g2 = ctx.createLinearGradient(ex, ey, ex, ey + dip);
+      g2.addColorStop(0, 'rgba(248,246,241,'+ca.toFixed(3)+')');
+      g2.addColorStop(1, 'rgba(248,246,241,0)');
+      ctx.strokeStyle = g2; ctx.lineWidth = 0.85 + 0.95*st.z;
+      ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(ex, ey + dip); ctx.stroke();
     }
     ctx.shadowBlur = 0;
 
-    // —— 系结高光：每根线尽头一个贴在字顶笔画上的小亮点（丝线被“系住”的立体点）——
+    // —— 系结：节点处暗描边(在白字上也清晰) + 径向高光 + 横穿笔画的短亮结，
+    //      强化“丝线牢牢咬住恨字顶笔画”的观感（画布已在字前，结点清晰可见）——
     for(var s=0; s<strands.length; s++){
       var st = strands[s];
-      var ex = cx + st.botX*W + swing, ey = st.ey*H + st.extra;
+      var ex = cx + st.frac*halfW + sw;
+      var ey = Math.min(gy + 0.50*gChar.h, Math.max(gy + 0.10*gChar.h, gy + 0.17*gChar.h + slope*(ex - cx)));
       var rr = 4 + 4*st.z;
+      // 暗描边：让白结压在白字上时仍有轮廓，明确“系住”
+      ctx.strokeStyle = 'rgba(20,16,18,'+(0.55*alpha).toFixed(3)+')';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(ex, ey, rr*0.82, 0, Math.PI*2); ctx.stroke();
+      // 径向高光结
       var g = ctx.createRadialGradient(ex, ey, 0, ex, ey, rr);
-      g.addColorStop(0, 'rgba(255,255,255,'+(0.92*alpha).toFixed(3)+')');
-      g.addColorStop(0.5, 'rgba(245,243,238,'+(0.35*alpha).toFixed(3)+')');
+      g.addColorStop(0, 'rgba(255,255,255,'+(0.95*alpha).toFixed(3)+')');
+      g.addColorStop(0.5, 'rgba(245,243,238,'+(0.40*alpha).toFixed(3)+')');
       g.addColorStop(1, 'rgba(245,243,238,0)');
       ctx.fillStyle = g;
       ctx.beginPath(); ctx.arc(ex, ey, rr, 0, Math.PI*2); ctx.fill();
+      // 横穿笔画的短亮结
+      ctx.strokeStyle = 'rgba(255,255,255,'+(0.70*alpha).toFixed(3)+')';
+      ctx.lineWidth = 1.1 + 0.6*st.z;
+      ctx.beginPath(); ctx.moveTo(ex - rr*0.7, ey); ctx.lineTo(ex + rr*0.7, ey); ctx.stroke();
     }
   }
 
@@ -268,7 +306,7 @@
     hen.style.opacity = 1;
     canvas.style.transform = 'none';
     canvas.style.opacity = 1;
-    drawRopes(1, 0, REST_Y*Math.PI/180);
+    drawRopes(1, 0);
     beam.style.opacity = 1; halo.style.opacity = 1; spot.style.opacity = .9;
     ai.style.transform = 'translate(-50%,-50%) rotateX(54deg) rotateZ(-38deg) scale(1)';
     ai.style.opacity = 1;
@@ -292,10 +330,11 @@
     // 恨：在最终静止姿态上叠加自上方落下的整视口位移
     hen.style.transform = restTransform((-H*shift).toFixed(1));
     hen.style.opacity   = visA.toFixed(3);
-    // 丝线画布：整张随组从上方坠下 + 同组淡入（末端始终严格系于恨顶缘，随组移动）
-    canvas.style.transform = 'translateY('+(-118*shift).toFixed(2)+'%)';
+    // 丝线画布：整张随组从上方坠下 + 同组淡入（与「恨」位移完全相同 → 节点全程锁定其顶缘）
+    canvas.style.transform = 'translateY('+(-100*shift).toFixed(2)+'%)';
     canvas.style.opacity   = visA.toFixed(3);
-    drawRopes(1, 0, REST_Y*Math.PI/180);
+    var sw = Math.sin(el/820) * charW * 0.045;       // 整组极轻微悬摆，首末同步保持咬合
+    drawRopes(1, sw);
 
     // 光：整组落定后，自上方缓缓打下（不再闪烁）—— 光束随强度下压、地面光池稍后亮起
     var L = 0, spotL = 0;
