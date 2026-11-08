@@ -79,57 +79,6 @@
     <div class="sign">— ' 絮 '</div>
   </section>
 
-  <!-- 细数我的罪 … 羽 骨 血 -->
-  <section class="sins fade d2">
-    <div class="kicker"><span class="n">04</span> Index · 碎片索引</div>
-    <div class="sins-title">细数我的罪 …</div>
-
-    <div class="traces">
-      <!-- red thread connecting the four fragments (命运之线) -->
-      <div class="dots" aria-hidden="true">
-        <canvas id="thread" width="100" height="100"></canvas>
-      </div>
-
-      <!-- 羽 (right, upper) -->
-      <a class="trace t1" href="crow.html">
-        <span class="no">[ 01* ]</span>
-        <span class="art"><img src="assets/yu.jpg" alt="羽"></span>
-        <span class="label"><span class="cn">羽 <span class="ar">↗</span></span><span class="en">Feather</span></span>
-        <span class="note">飞鸟衔走名字。</span>
-      </a>
-
-      <!-- 骨 (left, tall) -->
-      <a class="trace t2" href="bones.html">
-        <span class="no">[ 02* ]</span>
-        <span class="art"><img src="assets/gu.jpg" alt="骨"></span>
-        <span class="label"><span class="cn">骨 <span class="ar">↗</span></span><span class="en">Bone</span></span>
-        <span class="note">骨架替我记着姿势。</span>
-      </a>
-
-      <!-- 血 (right, lower, indented) -->
-      <a class="trace t3" href="church.html">
-        <span class="no">[ 03* ]</span>
-        <span class="art"><img src="assets/xue.jpg" alt="血"></span>
-        <span class="label"><span class="cn">血 <span class="ar">↗</span></span><span class="en">Blood</span></span>
-        <span class="note">它只流向你的膝。</span>
-      </a>
-
-      <!-- 神 (left, lowest) -->
-      <a class="trace t4" href="statue.html">
-        <span class="no">[ 04* ]</span>
-        <span class="art"><img src="assets/shen.jpg" alt="神"></span>
-        <span class="label"><span class="cn">神 <span class="ar">↗</span></span><span class="en">Deity</span></span>
-        <span class="note">石也会流血。</span>
-      </a>
-    </div>
-
-    <div class="sin-keys"><span>羽</span><span>骨</span><span>血</span><span>神</span></div>
-
-    <figure class="sins-fig">
-      <img src="assets/hands.jpg" alt="伸向光的手">
-    </figure>
-  </section>
-
   <!-- END -->
   <section class="end fade d3">
     <p>…虐杀我的灵魂…</p>
@@ -151,40 +100,6 @@
 </main>
 
 </div>
-
-<script>
-(function(){
-  var c = document.getElementById('thread');
-  if(!c) return;
-  // 对应 t1(羽) t2(骨) t3(血) t4(神) 的卡片中心
-  var pts = [[71.5,17],[27.5,43],[77,60.5],[27,85.5]];
-  function draw(){
-    var r = c.getBoundingClientRect();
-    if(!r.width) return;
-    var dpr = window.devicePixelRatio || 1;
-    c.width  = Math.round(r.width*dpr);
-    c.height = Math.round(r.height*dpr);
-    var ctx = c.getContext('2d');
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    ctx.clearRect(0,0,r.width,r.height);
-    ctx.strokeStyle = '#e01022'; ctx.lineWidth = 1.4; ctx.globalAlpha = 0.7;
-    ctx.beginPath();
-    pts.forEach(function(p,i){
-      var x = p[0]/100*r.width, y = p[1]/100*r.height;
-      i ? ctx.lineTo(x,y) : ctx.moveTo(x,y);
-    });
-    ctx.stroke();
-    ctx.globalAlpha = 0.9; ctx.fillStyle = '#e01022';
-    pts.forEach(function(p){
-      var x = p[0]/100*r.width, y = p[1]/100*r.height;
-      ctx.beginPath(); ctx.arc(x,y,2.2,0,Math.PI*2); ctx.fill();
-    });
-  }
-  window.addEventListener('resize', draw);
-  requestAnimationFrame(draw);
-  setTimeout(draw, 350);
-})();
-</script>
 
 <!-- 开场动画逻辑（立体）：恨吊丝线放下 → 光打在恨上 → 投影出红「爱」的阴影 -->
 <script>
