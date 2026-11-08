@@ -28,7 +28,7 @@
     <div class="sins-title">细数我的罪 …</div>
 
     <!-- 红线交互提示：置于标题下、卡片之上的醒目位置（非页底） -->
-    <p class="link-hint" id="linkHint"><b>长按</b>任意碎片，待<b>红边框变粗</b>，延伸红线链接其它模块<span class="hint-sub">（可任意多重连接）</span></p>
+    <p class="link-hint" id="linkHint"><b>点击</b>任意碎片选中，再<b>点击</b>另一块 · 红线即连成<span class="hint-sub">（可任意多重连接 · 点 ↗ 打开详情）</span></p>
 
     <div class="traces" id="traces">
       <!-- 红线画在卡片之下（z-index 低于卡片），只从卡片间的缝隙透出，绝不遮挡卡片上层 -->
@@ -87,7 +87,7 @@
 
 </div>
 
-<!-- ============ 交互红线：长按碎片拉出红线，接触到另一块即连上 ============ -->
+<!-- ============ 交互红线：点击碎片选中，再点击另一块即连成红线 ============ -->
 <script>
 (function(){
   var wrap = document.getElementById('traces');
@@ -99,11 +99,8 @@
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
 
   var links = [];        // 已连成的红线 {a, b}
-  var drag  = null;      // 当前正在牵引 {from, x, y, over}
-  var CHARGE = 650;      // 长按蓄力毫秒：红边框在此期间逐渐变粗
-  var LONGPRESS = CHARGE;
-  var MOVE_T    = 8;     // 移动阈值（px），超过即视为拖拽
-  var timer = null, srcIdx = -1, sx = 0, sy = 0, linking = false, justDragged = false;
+  var sel   = -1;        // 当前选中的源卡片下标（-1 未选）
+  var DEFAULT_HINT = hint ? hint.innerHTML : '';
 
   function wrapRect(){ return wrap.getBoundingClientRect(); }
   function size(){
@@ -139,22 +136,6 @@
       var a = center(l.a), b = center(l.b);
       line(a, b, 0.82); dot(b, 2.6, 0.9);
     });
-    // 正在牵引的红线
-    if(drag){
-      var a = center(drag.from);
-      var b = (drag.over >= 0) ? center(drag.over) : { x:drag.x, y:drag.y };
-      line(a, b, 0.96); dot(a, 3.2, 1);
-      if(drag.over >= 0) dot(b, 3.2, 1);
-    }
-  }
-  // 命中检测：返回指针所在（且非源）卡片下标
-  function cardAt(x, y, exc){
-    for(var i=0;i<cards.length;i++){
-      if(i === exc) continue;
-      var r = cards[i].getBoundingClientRect();
-      if(x>=r.left && x<=r.right && y>=r.top && y<=r.bottom) return i;
-    }
-    return -1;
   }
   // 是否已存在该无序对（避免同对重复叠线；不同对、多重连接均允许）
   function pairExists(a, b){
@@ -164,68 +145,55 @@
     }
     return false;
   }
-  function startLink(x, y){
-    if(srcIdx < 0) return;
-    linking = true;
-    var w = wrapRect();
-    drag = { from:srcIdx, x:x-w.left, y:y-w.top, over:-1 };
-    cards[srcIdx].classList.remove('charging');
-    cards[srcIdx].classList.add('linking');
+  function setSel(i){
+    if(sel >= 0) cards[sel].classList.remove('selected');
+    sel = i;
+    if(sel >= 0) cards[sel].classList.add('selected');
   }
-  function beginLink(){ startLink(sx, sy); }
-  function endLink(){
-    clearTimeout(timer); timer = null;
-    if(linking){
-      var over = drag ? drag.over : -1;
-      if(over >= 0 && !pairExists(drag.from, over)){
-        links.push({ a:drag.from, b:over });
-        if(hint) hint.innerHTML = '已连 <b>'+links.length+'</b> 条命运之线 · 长按其它碎片继续串联';
-      }
-      cards.forEach(function(c){ c.classList.remove('linking','link-target','charging'); });
-      drag = null; linking = false; justDragged = true;
-      setTimeout(function(){ justDragged = false; }, 0);
+  function clearSel(){ setSel(-1); }
+
+  function toggle(i){
+    if(sel === -1){
+      // 第一次点击：选中该碎片（红边框变粗 = 待连线）
+      setSel(i);
+      if(hint) hint.innerHTML = '已选中 <b>'+(i+1)+'号</b> 碎片 · 再点击另一块连成红线';
+    } else if(sel === i){
+      // 再次点击同一块：取消选择
+      clearSel();
+      if(hint) hint.innerHTML = DEFAULT_HINT;
+    } else {
+      // 第二次点击另一块：连成红线
+      var ok = !pairExists(sel, i);
+      if(ok) links.push({ a:sel, b:i });
+      clearSel();
+      if(ok && hint) hint.innerHTML = '已连 <b>'+links.length+'</b> 条命运之线 · 继续点击其它碎片串联';
       draw();
     }
-    srcIdx = -1;
   }
 
   cards.forEach(function(el, i){
-    el.style.touchAction = 'none';
-    el.addEventListener('pointerdown', function(e){
-      e.preventDefault();          // 阻止 <a> 原生拖拽 / 文本选择，避免 pointercancel 打断连线
-      srcIdx = i; sx = e.clientX; sy = e.clientY; linking = false;
-      el.style.setProperty('--charge-dur', CHARGE + 'ms');
-      el.classList.add('charging');   // 红边框开始逐渐变粗（蓄力）
-      timer = setTimeout(beginLink, LONGPRESS);
-    });
+    el.style.touchAction = 'manipulation';
     el.addEventListener('dragstart', function(e){ e.preventDefault(); });
     el.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+    // 点击碎片 = 选中/连线；点 ↗ 箭头 = 打开详情页（放行默认导航）
     el.addEventListener('click', function(e){
-      if(justDragged){ e.preventDefault(); justDragged = false; }
+      if(e.target.closest('.ar')) return;
+      e.preventDefault();
+      toggle(i);
+    });
+    // 已选一块时，悬停另一块预览为连线目标（粗红框）
+    el.addEventListener('mouseenter', function(){
+      if(sel >= 0 && sel !== i) el.classList.add('link-target');
+    });
+    el.addEventListener('mouseleave', function(){
+      el.classList.remove('link-target');
     });
   });
 
-  window.addEventListener('pointermove', function(e){
-    if(srcIdx < 0) return;
-    // 长按未触发前，移动视为滚动 —— 取消长按 + 移除蓄力态，不启动连线（保留页面滚动）
-    if(!linking){
-      if(Math.hypot(e.clientX-sx, e.clientY-sy) > MOVE_T){
-        clearTimeout(timer);
-        if(cards[srcIdx]) cards[srcIdx].classList.remove('charging');
-      }
-      return;
-    }
-    var w = wrapRect();
-    drag.x = e.clientX - w.left; drag.y = e.clientY - w.top;
-    var over = cardAt(e.clientX, e.clientY, drag.from);
-    if(over !== drag.over){
-      drag.over = over;
-      cards.forEach(function(c, ci){ c.classList.toggle('link-target', ci === over); });
-    }
-    draw();
+  // 点击空白处取消当前选择
+  window.addEventListener('click', function(e){
+    if(!e.target.closest('.trace')) clearSel();
   });
-  window.addEventListener('pointerup', endLink);
-  window.addEventListener('pointercancel', endLink);
 
   window.addEventListener('resize', size);
   requestAnimationFrame(size);
