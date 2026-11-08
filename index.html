@@ -6,10 +6,19 @@
 <title>絮 · XÙ — 祷念</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;600;700&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;600;700&family=Noto+Sans+SC:wght@400;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
+<!-- ============ 开场动画：恨吊绳下落 → 投影红「爱」 ============ -->
+<div class="intro" id="intro" aria-hidden="true">
+  <canvas id="ropes"></canvas>
+  <div class="spot" id="spot"></div>
+  <div class="hen" id="hen">恨</div>
+  <div class="ai" id="ai">爱</div>
+  <button class="skip" id="skip" type="button">跳过 ›</button>
+</div>
 
 <div class="device">
   <span class="notch"></span>
@@ -178,6 +187,121 @@
   window.addEventListener('resize', draw);
   requestAnimationFrame(draw);
   setTimeout(draw, 350);
+})();
+</script>
+
+<!-- 开场动画逻辑：恨吊绳悬晃 → 下落 → 投影红「爱」 -->
+<script>
+(function(){
+  var intro = document.getElementById('intro');
+  if(!intro) return;
+  var KEY = 'xu_intro_v1';
+  var force = /[?&]intro\b/.test(location.search);
+  if(!force && sessionStorage.getItem(KEY)){ intro.parentNode.removeChild(intro); return; }
+
+  var canvas = document.getElementById('ropes');
+  var ctx = canvas.getContext('2d');
+  var hen = document.getElementById('hen');
+  var ai  = document.getElementById('ai');
+  var spot= document.getElementById('spot');
+  var skip= document.getElementById('skip');
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  function size(){
+    canvas.width  = innerWidth * dpr;
+    canvas.height = innerHeight * dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  size();
+  addEventListener('resize', size);
+
+  // 时间线 (ms)
+  var SWING=1600, FALL=1150, AIIN=1000, HOLD=800, OUT=900;
+  var fallEnd = SWING+FALL;          // 2750
+  var aiStart = fallEnd;             // 2750
+  var total   = aiStart+AIIN+HOLD;   // 4550
+
+  var ropesX = [-58,-30,-2,26,54];   // 顶部吊点偏移
+  var ropeAlpha = 1, ty = 0, ang = 0;
+  var done = false;
+
+  function henTop(){ return innerHeight * 0.30; }
+
+  function drawRopes(alpha, ax, ay){
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+    if(alpha <= 0) return;
+    ctx.strokeStyle = 'rgba(245,243,238,'+(0.5*alpha).toFixed(3)+')';
+    ctx.lineWidth = 1;
+    var cx = innerWidth/2;
+    ropesX.forEach(function(ox){
+      var sx = cx+ox, sy = 0;
+      var mx = (sx+ax)/2 + ox*0.14, my = (sy+ay)/2 + 46; // 轻微弯曲
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.quadraticCurveTo(mx, my, ax, ay);
+      ctx.stroke();
+    });
+  }
+
+  function finish(){
+    if(done) return; done = true;
+    intro.classList.add('gone');
+    setTimeout(function(){
+      if(intro.parentNode) intro.parentNode.removeChild(intro);
+      try{ sessionStorage.setItem(KEY,'1'); }catch(e){}
+    }, 950);
+  }
+  if(skip) skip.addEventListener('click', finish);
+
+  // 减动效：静态构图后快速揭开
+  if(reduce){
+    hen.style.transform = 'translate(-50%,0) rotate(0deg)';
+    drawRopes(1, innerWidth/2, henTop());
+    ai.style.opacity = 1; spot.style.opacity = .9;
+    ai.style.transform = 'translate(-50%,-50%) scale(1)';
+    setTimeout(finish, 1400);
+    return;
+  }
+
+  var T0 = null;
+  function frame(now){
+    if(done) return;
+    if(T0 === null) T0 = now;
+    var el = now - T0;
+    var cx = innerWidth/2, ay0 = henTop();
+
+    if(el < SWING){
+      var p = el/SWING;
+      ang = Math.sin(el/1000 * 2.4) * 7 * (1 - p*0.25);  // 悬晃
+      ty = 0; ropeAlpha = 1;
+    } else if(el < fallEnd){
+      var f = (el - SWING)/FALL;                         // 0..1
+      var e = f*f;                                       // 重力加速
+      ty = e * (innerHeight*0.95);
+      ang = 7 + f*34;
+      ropeAlpha = Math.max(0, 1 - f*7);                  // 绳骤断
+    } else {
+      ty = innerHeight*0.95; ang = 44; ropeAlpha = 0;
+    }
+    hen.style.transform = 'translate(-50%,'+ty.toFixed(1)+'px) rotate('+ang.toFixed(2)+'deg)';
+    drawRopes(ropeAlpha, cx, ay0 + ty);
+
+    if(el > aiStart){
+      var a = Math.min(1, (el - aiStart)/AIIN);
+      ai.style.opacity = a;
+      spot.style.opacity = (a*0.9).toFixed(3);
+      var s = 1.08 - 0.08*a;
+      ai.style.transform = 'translate(-50%,-50%) scale('+s.toFixed(3)+')';
+    }
+
+    if(el > total){ finish(); return; }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // 兜底：若 rAF 异常，5.5s 后强制揭开
+  setTimeout(finish, 5600);
 })();
 </script>
 
