@@ -26,7 +26,7 @@
 }
 
 *{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;}
+html{scroll-behavior:smooth;background:#0a0a0a;}
 body{
   background:
     radial-gradient(140% 100% at 50% -10%, #161514 0%, #0a0a0a 55%) fixed;
@@ -410,33 +410,31 @@ a{color:inherit;text-decoration:none;}
 
 #ropes{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;}
 .spot{
-  position:absolute;left:50%;top:63%;width:min(82vw,600px);height:min(50vw,360px);
-  transform:translate(-50%,-50%);z-index:1;
-  background:radial-gradient(ellipse at center, rgba(224,16,34,.20) 0%, rgba(224,16,34,.07) 38%, transparent 70%);
-  opacity:0;pointer-events:none;filter:blur(2px);
+  position:absolute;left:50%;top:66%;width:min(92vw,660px);height:min(27vw,200px);
+  transform:translate(-50%,-50%);z-index:6;
+  background:radial-gradient(ellipse at center, rgba(224,16,34,.22) 0%, rgba(224,16,34,.08) 40%, transparent 72%);
+  opacity:0;pointer-events:none;filter:blur(3px);
 }
+/* 立体字：「恨」由 JS 堆叠多层 .xl 沿 Z 轴挤出，正面亮白 → 背面暗 */
 .hen{
-  position:absolute;left:50%;top:30%;z-index:3;
+  position:absolute;left:50%;top:30%;z-index:6;
   font-family:'Ma Shan Zheng','Noto Serif SC',serif;
   font-size:clamp(86px,22vw,168px);line-height:1;
-  color:#f4f2ee;
-  transform:translate(-50%,0) rotateY(0deg);
-  transform-origin:top center;transform-style:preserve-3d;
-  text-shadow:0 0 26px rgba(0,0,0,.7);
-  filter:drop-shadow(0 22px 30px rgba(0,0,0,.55));
+  transform-style:preserve-3d;will-change:transform;
+}
+.hen .xl{position:absolute;left:0;top:0;white-space:nowrap;}
+/* 立体字：「爱」同样由 JS 堆叠挤出，红正面 → 暗红侧面，趴在地面光池 */
+.ai{
+  position:absolute;left:50%;top:66%;z-index:6;
+  font-family:'Ma Shan Zheng','Noto Serif SC',serif;
+  font-size:clamp(128px,36vw,275px);line-height:1;
+  opacity:0;transform-style:preserve-3d;
+  transform:rotateX(48deg) scale(1.08);
   will-change:transform;
 }
-.ai{
-  position:absolute;left:50%;top:63%;z-index:3;
-  font-family:'Ma Shan Zheng','Noto Serif SC',serif;
-  font-size:clamp(96px,27vw,210px);line-height:1;
-  color:#e01022;opacity:0;
-  transform:translate(-50%,-50%) scale(1.08);
-  text-shadow:0 0 34px rgba(224,16,34,.8),0 0 90px rgba(224,16,34,.45),0 0 4px rgba(224,16,34,.95);
-  will-change:transform,opacity;
-}
+.ai .xl{position:absolute;left:0;top:0;white-space:nowrap;}
 .skip{
-  position:absolute;right:18px;bottom:18px;z-index:5;
+  position:absolute;right:18px;bottom:18px;z-index:7;
   background:none;border:1px solid rgba(245,243,238,.3);color:var(--ink-dim);
   font-family:var(--sans);font-size:11px;letter-spacing:.2em;
   padding:7px 14px;cursor:pointer;transition:.3s var(--ease);
