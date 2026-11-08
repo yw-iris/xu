@@ -504,7 +504,7 @@ a{color:inherit;text-decoration:none;}
 .scene{position:absolute;inset:0;perspective:1100px;perspective-origin:50% 36%;overflow:hidden;}
 .scene .stage{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(10deg);}
 
-#ropes{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;}
+#ropes{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:8;}
 /* 光束：自上方打下的锥形白光（穿过恨，落在地面光池） */
 .beam{
   position:absolute;left:51.4%;top:0;z-index:2;
