@@ -524,13 +524,13 @@ a{color:inherit;text-decoration:none;}
 /* 立体字：「爱」同样由 JS 堆叠挤出，红正面 → 暗红侧面，趴在地面光池 */
 /* 「爱」：投影在光池里的红色阴影（扁平剪影，略带趴伏透视） */
 .ai{
-  position:absolute;left:47%;top:56%;z-index:6;
+  position:absolute;left:54.6%;top:59.4%;z-index:6;
   font-family:'Ma Shan Zheng','Noto Serif SC',serif;
-  font-size:clamp(98px,30vw,240px);line-height:1;
-  color:#3c0a10;
+  font-size:clamp(130px,48vw,340px);line-height:1;
+  color:#7a2028;
   transform-style:preserve-3d;
-  transform:rotateX(24deg) rotateZ(-6deg) scale(1);
-  text-shadow:0 0 14px rgba(224,16,34,.28);
+  transform:translate(-50%,-50%) rotateX(52deg) rotateZ(-38deg) scale(1);
+  text-shadow:0 0 16px rgba(224,16,34,.3);
   will-change:transform,opacity;
 }
 .skip{
