@@ -241,6 +241,25 @@
     }
   })();
 
+  // ---- 立体字：「爱」同样多层沿 Z 轴挤出（红正面 → 暗红侧面），与「恨」统一立体风格 ----
+  (function buildAi(){
+    var afs = parseFloat(getComputedStyle(ai).fontSize) || 60;
+    var LAYERS = 22, GAP = Math.max(1.0, afs*0.040);
+    var txt = (ai.textContent || '爱').trim();
+    ai.textContent = '';
+    for(var j=0;j<LAYERS;j++){
+      var d = document.createElement('div');
+      d.className = 'xl';
+      d.textContent = txt;
+      var t = j/(LAYERS-1);
+      var r = Math.round(240 - 195*t), g = Math.round(30 - 27*t), b = Math.round(44 - 35*t); // 亮红 → 深暗红
+      d.style.color = 'rgb('+r+','+g+','+b+')';
+      d.style.transform = 'translate(-50%,0) translateZ('+(-j*GAP).toFixed(2)+'px)';
+      if(j===0) d.style.textShadow = '0 0 9px rgba(224,16,34,.4)';
+      ai.appendChild(d);
+    }
+  })();
+
   // ---- 丝线：纯白、自顶部居中垂下，近平行、略扇形张开（参照图：无红线、无交叉网）----
   // [顶部横杆锚点(×W*0.13), 系到字笔画上(×charW*0.46), 红色?]
   var MAP = [
@@ -254,7 +273,7 @@
   ];
   var strands = [];
   for(var m=0;m<MAP.length;m++){
-    strands.push({topX:MAP[m][0]*W*0.13, botX:MAP[m][1]*charW*0.46, red:MAP[m][2], lenJ:((m*53)%13)-6});
+    strands.push({topX:MAP[m][0]*W*0.13, botX:MAP[m][1]*charW*0.34, red:MAP[m][2], lenJ:((m*53)%13)-6});
   }
 
   function henTop(){ return H * 0.30; }
@@ -265,7 +284,7 @@
   function drawRopes(alpha, ay, angRad){
     ctx.clearRect(0,0,W,H);
     if(alpha <= 0) return;
-    var cx = W*0.50, topY = H*0.012;
+    var cx = W*0.53, topY = H*0.012;
     var swing = Math.sin(angRad) * charW * 0.20;      // 钟摆横移
     // 顶部固定横杆（贴画面上缘）
     ctx.lineCap = 'butt';
@@ -279,7 +298,7 @@
       var col = st.red ? '224,16,34' : '245,243,238';
       var sx = cx + st.topX, sy = topY + 1;
       var ex = cx + st.botX + swing;
-      var ey = ay + charW*0.16 + st.lenJ + st.botX * 0.12;   // 扎进字上沿笔画（em 框顶与墨迹有间隙）
+      var ey = ay + charW*0.42 + st.lenJ + st.botX * 0.10;   // 扎进字上半部（字盖住线，呈现被吊起）
       if(st.red){ ctx.shadowColor = 'rgba(224,16,34,.55)'; ctx.shadowBlur = 6; }
       ctx.strokeStyle = 'rgba('+col+','+((st.red?0.90:0.62)*alpha).toFixed(3)+')';
       ctx.lineWidth = st.red ? 1.05 : 0.85;
@@ -301,11 +320,10 @@
 
   // 减动效：静态构图后快速揭开
   if(reduce){
-    hen.style.transform = 'translateY(0) rotateZ(28deg) rotateY(-18deg) rotateX(8deg)';
+    hen.style.transform = 'translateY(0) rotateZ(18deg) rotateY(-12deg) rotateX(6deg)';
     drawRopes(1, henTop(), -18*Math.PI/180);
     beam.style.opacity = 1; halo.style.opacity = 1; spot.style.opacity = .9;
-    ai.style.opacity = 1;
-    ai.style.transform = 'translate(-50%,-50%) rotateX(30deg) scale(1)';
+    ai.style.transform = 'rotateX(24deg) rotateZ(-6deg) scale(1)';
     setTimeout(finish, 1400);
     return;
   }
@@ -338,7 +356,7 @@
       ang = -18 + Math.sin(r2*2.2) * 2.5;
       rx  = 8 + Math.sin(r2*2.2) * 1.0;
     }
-    hen.style.transform = 'translateY('+ty.toFixed(1)+'px) rotateZ(28deg) rotateY('+ang.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
+    hen.style.transform = 'translateY('+ty.toFixed(1)+'px) rotateZ(18deg) rotateY('+ang.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
     drawRopes(1, ay0 + ty, ang * Math.PI/180);
 
     // 光：自上方缓缓打下（不再闪烁）—— 光束随强度下压、地面光池稍后亮起
@@ -354,15 +372,13 @@
     halo.style.opacity = L.toFixed(3);
     spot.style.opacity = (spotL*0.92).toFixed(3);
 
-    // 红色「爱」的阴影：由虚到实，从光里浮现（blur 收拢 + 缩放落定）
+    // 红「爱」：从光池里由小放大浮现（保持 opacity=1 不破坏 3D 挤出）
     if(el > shadowStart){
       var a = Math.min(1, (el - shadowStart)/SHADOW);
       var ease = 1 - Math.pow(1-a, 2.2);
-      ai.style.opacity = ease;
-      ai.style.filter = 'blur('+((1-ease)*13).toFixed(1)+'px)';
-      var s = 1.22 - 0.22*ease;
-      var dy = -14 * (1-ease);
-      ai.style.transform = 'translate(-50%,-50%) rotateX(28deg) rotateZ(-20deg) scale('+s.toFixed(3)+') translateY('+dy.toFixed(1)+'px)';
+      var s = 0.4 + 0.6*ease;                 // 0.4 → 1.0
+      var dy = -22 * (1-ease);
+      ai.style.transform = 'rotateX(24deg) rotateZ(-6deg) scale('+s.toFixed(3)+') translateY('+dy.toFixed(1)+'px)';
     }
 
     if(el > total){ finish(); return; }
