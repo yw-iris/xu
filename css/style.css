@@ -565,11 +565,15 @@ a{color:inherit;text-decoration:none;}
   border:1px solid rgba(224,16,34,.38);
   background:rgba(224,16,34,.07);
   border-radius:3px;
-  display:flex;align-items:center;gap:10px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px;
   transition:opacity .7s var(--ease);
 }
 .link-hint b{color:var(--red);font-weight:700;}
-.link-hint .hint-sub{color:var(--ink-dim);font-weight:500;}
+.link-hint .hint-main{flex:1 1 auto;}
+.link-hint .hint-sub{
+  flex:1 0 100%;margin-top:4px;
+  color:var(--ink-dim);font-weight:500;font-size:10px;letter-spacing:.08em;
+}
 .link-hint::before{
   content:"";flex:0 0 auto;width:8px;height:8px;border-radius:50%;
   background:var(--red);box-shadow:0 0 10px var(--red-glow);
