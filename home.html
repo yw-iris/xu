@@ -327,10 +327,10 @@
       }
       ctx.globalAlpha = 1;
 
-      // 十字架（绘于文字之上、红线之下，红线从其臂交点发出）
+      // 十字架（绘于文字之上、红线之下，红线从其臂交点发出；随心脏消隐同步淡出）
       if(crossImg.complete && crossImg.naturalWidth){
         var cw = CROSS_W*crossS, ch = CROSS_H*crossS;
-        ctx.globalAlpha = gAll;
+        ctx.globalAlpha = gAll * Math.max(0, 1 - scat);
         ctx.drawImage(crossImg, crossX - cw/2, crossY - ch/2, cw, ch);
         ctx.globalAlpha = 1;
       }
