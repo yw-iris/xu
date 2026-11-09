@@ -496,6 +496,8 @@ a{color:inherit;text-decoration:none;}
    ============================================================ */
 .intro{position:fixed;inset:0;z-index:9999;background:#000;overflow:hidden;transition:opacity .9s ease;}
 .intro.gone{opacity:0;pointer-events:none;}
+/* 开场视频：黑色背景上由文字排成的心，铺满整屏 */
+.intro-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000;z-index:1;}
 /* 暗角：字悬浮于黑暗，边缘渐隐入黑 */
 .intro::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:4;
   background:radial-gradient(ellipse 75% 70% at 50% 42%, transparent 55%, rgba(0,0,0,.85) 100%);}
