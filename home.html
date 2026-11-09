@@ -267,12 +267,12 @@
     function frame(now){
       var t = (now-started)/1000;
       if(SCAT === Infinity && t > 22){ SCAT = t; }         // 兜底：一直没点也自动消散
-      if(SCAT !== Infinity && t >= SCAT + 3.4){ finish(); return; }
+      if(SCAT !== Infinity && t >= SCAT + 1.6){ finish(); return; }
       ctx.setTransform(scale*dpr,0,0,scale*dpr,0,0);
       ctx.textBaseline = 'top';
       ctx.fillStyle = '#000'; ctx.fillRect(0,0,W,H);
       var gAll = Math.min(1, t/0.5);                 // 整体淡入
-      var scat = SCAT === Infinity ? 0 : Math.max(0, Math.min(1, (t-SCAT)/2.8)); // 慢慢消隐
+      var scat = SCAT === Infinity ? 0 : Math.max(0, Math.min(1, (t-SCAT)/1.1)); // 快速消隐
 
       // 文字
       for(var i=0;i<words.length;i++){
@@ -316,7 +316,7 @@
           x0 += Math.sin(t*2.6 + k2*0.16) * sw * (k2/n) * (1-tight);
           pts.push([x0,y0]);
         }
-        var fade = scat>0 ? Math.max(0,1-scat*1.6) : 1;
+        var fade = scat>0 ? Math.max(0,1-scat) : 1;
         if(fade > 0.02){
           ctx.strokeStyle = RED + (205*fade) + ')';
           ctx.lineWidth = 2; ctx.lineJoin = 'miter'; ctx.lineCap='round';
@@ -338,15 +338,22 @@
         }
       }
 
-      // 心跳脉冲：扯直瞬间心脏跳一下（一次扩散红环）
+      // 心跳脉冲：扯直瞬间心脏跳一下（一次大幅扩散红环 + 中心光团）
       if(beatAt >= 0){
         var bt = t - beatAt;
         if(bt >= 0 && bt < 1.2){
           var bp = bt/1.2, ringA = 1 - bp;
-          ctx.lineWidth = 2.4*(1-bp)+0.5;
-          ctx.strokeStyle = RED + (200*ringA) + ')';
-          ctx.beginPath(); ctx.arc(heartX, heartY, 8 + bp*78, 0, 6.29); ctx.stroke();
-          ctx.beginPath(); ctx.arc(heartX, heartY, 8 + bp*50, 0, 6.29); ctx.stroke();
+          // 中心脉冲光团（先亮后散）
+          var g = ctx.createRadialGradient(heartX, heartY, 0, heartX, heartY, 26*(1-bp*0.7)+8);
+          g.addColorStop(0, RED + (200*ringA) + ')');
+          g.addColorStop(1, RED + '0)');
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(heartX, heartY, 26*(1-bp*0.7)+8, 0, 6.29); ctx.fill();
+          // 双层大幅扩散红环
+          ctx.lineWidth = 3.6*(1-bp)+0.6;
+          ctx.strokeStyle = RED + (220*ringA) + ')';
+          ctx.beginPath(); ctx.arc(heartX, heartY, 8 + bp*135, 0, 6.29); ctx.stroke();
+          ctx.beginPath(); ctx.arc(heartX, heartY, 8 + bp*88, 0, 6.29); ctx.stroke();
         }
       }
 
