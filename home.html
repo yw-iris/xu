@@ -203,6 +203,7 @@
     // ---- 穿线状态：点击节点后，从该节点向心脏穿出一根红线 ----
     var threads = [];      // {nx, ny, born}  从节点(nx,ny)向心脏穿出的线
     var clicked = {};      // 已穿线节点的索引（不再显示可点击提示）
+    var beatAt = -9;        // 心脏跳动触发时刻（每穿一条线更新一次）
 
     // ---- 尺寸 ----
     var scale=1, dpr=1;
@@ -234,6 +235,7 @@
           for(var j=0;j<threads.length;j++){ if(threads[j].nx===n.x && threads[j].ny===n.y){ ex=threads[j]; break; } }
           if(ex){ ex.born = nowT; }                  // 重复点击 → 重穿
           else { threads.push({nx:n.x, ny:n.y, born:nowT}); clicked[i] = true; }
+          beatAt = nowT;                             // 每穿一条线，心脏跳一下
           break;
         }
       }
@@ -319,6 +321,25 @@
           ctx.fillRect(nd.x + 15, nd.y - 8, 2.4, 16);       // 闪烁竖线光标
           ctx.globalAlpha = 1;
         }
+      }
+
+      // 心脏：红线汇聚中心，平时微光，每穿一条线短暂跳一下
+      var sinceBeat = t - beatAt;
+      var beat = (sinceBeat >= 0 && sinceBeat < 0.5) ? Math.sin(sinceBeat/0.5*Math.PI) : 0;
+      var hb = 1 + 0.6*beat;                       // 跳动时放大
+      var hA = gAll * (scat>0 ? Math.max(0,1-scat) : 1);
+      if(hA > 0.02){
+        ctx.save();
+        ctx.globalAlpha = hA;
+        var grd = ctx.createRadialGradient(heartX, heartY, 0, heartX, heartY, 26*hb);
+        grd.addColorStop(0, 'rgba(255,80,90,0.92)');
+        grd.addColorStop(0.5, 'rgba(225,35,45,0.42)');
+        grd.addColorStop(1, 'rgba(225,35,45,0)');
+        ctx.fillStyle = grd;
+        ctx.beginPath(); ctx.arc(heartX, heartY, 26*hb, 0, 6.29); ctx.fill();
+        ctx.fillStyle = 'rgba(255,95,105,0.95)';
+        ctx.beginPath(); ctx.arc(heartX, heartY, 5*hb, 0, 6.29); ctx.fill();
+        ctx.restore();
       }
 
       requestAnimationFrame(frame);
