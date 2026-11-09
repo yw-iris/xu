@@ -34,40 +34,65 @@
 </div>
 
 <!-- BGM：隐藏视频音轨循环播放（首次用户交互后开声） -->
+<!-- BGM：iframe 壳承载时由 shell 统一播放；独立打开时自播；静音跨页记忆 -->
+<!-- BGM：iframe 壳承载时由 shell 统一播放；独立打开时自播；静音跨页记忆 -->
 <audio id="bgm" src="assets/bgm.mp4" loop preload="auto" playsinline></audio>
 <button id="bgmToggle" class="bgm-toggle" type="button" aria-label="背景音乐 开/关" title="背景音乐">♪</button>
 <script>
 (function(){
-  var bgm = document.getElementById('bgm');
+  var IN_FRAME = (window.self !== window.top);
+  // 顶层直接访问 → 交给 shell 承载（切换页面音乐不断）；?raw 可绕过用于调试
+  if(!IN_FRAME){
+    var cur = location.pathname.split('/').pop() || 'index.html';
+    if(location.search.indexOf('raw') < 0){ location.replace('shell.html?p=' + cur); return; }
+  }
+  // 站内链接：iframe 内让 shell 切换 iframe；顶层也交给 shell
+  document.addEventListener('click', function(e){
+    var a = e.target && e.target.closest ? e.target.closest('a') : null;
+    if(!a) return;
+    var h = a.getAttribute('href') || '';
+    if(a.target || /^https?:/.test(h)) return;
+    if(/\.html/.test(h)){
+      e.preventDefault();
+      var target = h.split('#')[0].split('?')[0];
+      if(IN_FRAME){ parent.postMessage({type:'xu-nav', href:target}, '*'); }
+      else { location.href = 'shell.html?p=' + target; }
+    }
+  });
+  var KEY = 'xu_bgm_off';
   var btn = document.getElementById('bgmToggle');
+  // 处于 iframe 内：音频交给 shell，按钮作为静音控制转发给 shell
+  if(IN_FRAME){
+    var bgm = document.getElementById('bgm'); if(bgm) bgm.remove();
+    var on = localStorage.getItem(KEY) !== '1';
+    if(btn){ btn.classList.toggle('off', !on);
+      btn.addEventListener('click', function(e){ e.stopPropagation(); parent.postMessage({type:'xu-mute'}, '*'); });
+    }
+    // 首次交互 → 通知 shell 开声
+    document.addEventListener('pointerdown', function(){ parent.postMessage({type:'xu-gesture'}, '*'); });
+    // 接收 shell 的静音状态回传
+    window.addEventListener('message', function(e){ var d=e.data||{}; if(d.type==='xu-mute-state' && btn){ btn.classList.toggle('off', !d.on); } });
+    return;
+  }
+  // —— 以下仅在顶层独立打开（?raw）时执行 ——
+  var bgm = document.getElementById('bgm');
   if(!bgm) return;
   bgm.volume = 0.5;
-  var KEY = 'xu_bgm_off';
-  var on = localStorage.getItem(KEY) !== '1';      // 静音状态跨页记忆
+  var on = localStorage.getItem(KEY) !== '1';
   function applyBtn(){ if(btn) btn.classList.toggle('off', !on); }
   applyBtn();
   function tryPlay(){ if(on) bgm.play().catch(function(){}); }
-  tryPlay();                                      // 进入页面即尝试自动播放
+  tryPlay();
   window.addEventListener('load', tryPlay);
-  function startOnce(){
-    tryPlay();
-    window.removeEventListener('pointerdown', startOnce);
-    window.removeEventListener('touchstart', startOnce);
-    window.removeEventListener('keydown', startOnce);
-  }
-  // 浏览器禁止带声自动播放 → 首次交互后开声（兜底）
+  function startOnce(){ tryPlay(); window.removeEventListener('pointerdown', startOnce); window.removeEventListener('touchstart', startOnce); window.removeEventListener('keydown', startOnce); }
   window.addEventListener('pointerdown', startOnce);
   window.addEventListener('touchstart', startOnce);
   window.addEventListener('keydown', startOnce);
-  if(btn) btn.addEventListener('click', function(e){
-    e.stopPropagation();
-    on = !on;
-    localStorage.setItem(KEY, on ? '0' : '1');
-    applyBtn();
-    if(on) tryPlay(); else bgm.pause();
-  });
+  if(btn) btn.addEventListener('click', function(e){ e.stopPropagation(); on=!on; localStorage.setItem(KEY, on?'0':'1'); applyBtn(); if(on) tryPlay(); else bgm.pause(); });
 })();
 </script>
+
+
 
 
 
