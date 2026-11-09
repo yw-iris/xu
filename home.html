@@ -256,13 +256,16 @@
       ctx.textBaseline = 'top';
       ctx.fillStyle = '#000'; ctx.fillRect(0,0,W,H);
 
-      // 整体搏动：每穿一条线，整个文字心脏围绕中心短暂胀缩一次
+      // 整体搏动：每穿一条线，整个文字心脏向上弹跳并轻微胀大一次
       ctx.save();
       var sinceBeat = t - beatAt;
       var beat = (sinceBeat >= 0 && sinceBeat < 0.5) ? Math.sin(sinceBeat/0.5*Math.PI) : 0;
       if(beat > 0){
-        var bs = 1 + 0.05*beat;
-        ctx.translate(W/2, H/2); ctx.scale(bs, bs); ctx.translate(-W/2, -H/2);
+        var jb = 22*beat;                  // 向上跳的位移(逻辑px)
+        var sc = 1 + 0.04*beat;            // 轻微胀大
+        ctx.translate(W/2, H/2);
+        ctx.scale(sc, sc);
+        ctx.translate(-W/2, -(H/2 + jb));  // 整体上跳
       }
       var gAll = Math.min(1, t/0.5);                 // 整体淡入
       var scat = SCAT === Infinity ? 0 : Math.max(0, Math.min(1, (t-SCAT)/1.1)); // 快速消隐
