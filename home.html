@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>絮 · XÙ — 祷念档案</title>
+<link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;600;700&family=Noto+Sans+SC:wght@400;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
@@ -89,25 +90,26 @@
 (function(){
   var intro = document.getElementById('intro');
   if(!intro) return;
-  var KEY = 'xu_intro_v3';
+  var KEY = 'xu_intro_v4';
   var force = /[?&]intro\b/.test(location.search);
   if(!force && localStorage.getItem(KEY)){ intro.parentNode.removeChild(intro); return; }
 
   var vid  = document.getElementById('introVid');
   var skip = document.getElementById('skip');
   var done = false;
+  function persist(){ try{ localStorage.setItem(KEY,'1'); }catch(e){} }
   function finish(){
     if(done) return; done = true;
     intro.classList.add('gone');
     setTimeout(function(){
       if(intro.parentNode) intro.parentNode.removeChild(intro);
-      try{ localStorage.setItem(KEY,'1'); }catch(e){}
     }, 950);
   }
-  if(skip) skip.addEventListener('click', finish);
+  // 仅「主动点跳过」才记忆，自然播完不锁死（便于反复查看开场）
+  if(skip) skip.addEventListener('click', function(){ persist(); finish(); });
 
   // 播放开场视频：黑色背景上的文字心；结束 / 出错 / 被拦截 均进入正文
-  function start(){ if(vid){ var p = vid.play(); if(p && p.catch) p.catch(function(){}); } }
+  function start(){ if(vid){ vid.muted = true; vid.defaultMuted = true; vid.setAttribute('muted',''); var p = vid.play(); if(p && p.catch) p.catch(function(){}); } }
   if(vid){
     vid.addEventListener('ended', finish);
     vid.addEventListener('error', finish);
