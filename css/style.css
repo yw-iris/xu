@@ -416,8 +416,12 @@ a{color:inherit;text-decoration:none;}
 .letter .for{font-family:var(--serif);font-size:15px;color:var(--ink-dim);letter-spacing:.06em;}
 .letter .atonement-q{font-size:clamp(15px,4.2vw,19px);color:var(--ink);text-align:right;margin-top:6px;}
 .letter .sign{font-family:var(--sans);font-weight:600;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-faint);text-align:right;margin-top:14px;}
-.snow{margin-top:22px;text-align:center;}
-.snow img{display:block;width:100%;max-width:min(86%,430px);height:auto;margin:0 auto;border:none;box-shadow:none;background:#000;}
+  .snow{margin-top:22px;text-align:center;position:relative;cursor:pointer;}
+  .snow img{display:block;width:100%;max-width:min(86%,430px);height:auto;margin:0 auto;border:none;box-shadow:none;background:#000;}
+  /* 视频原位覆盖在刊头图上：点击图片隐藏图片并显示视频，播完恢复 */
+  .snow-video{position:absolute;left:50%;top:0;transform:translateX(-50%);
+    width:100%;max-width:min(86%,430px);height:100%;object-fit:contain;
+    display:none;background:#000;cursor:pointer;}
 
 /* ---- 信徒档案 (profile) ---- */
 .profile{position:relative;z-index:3;margin-top:38px;}
