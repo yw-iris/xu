@@ -15,6 +15,7 @@
 <div class="intro" id="intro" aria-hidden="true">
   <video id="introVid" class="intro-video" src="assets/intro_black.mp4"
          muted autoplay playsinline preload="auto"></video>
+  <div class="intro-tap" id="introTap">轻触屏幕 · 播放开场 ▶</div>
   <button class="skip" id="skip" type="button">跳过 ›</button>
 </div>
 
@@ -96,6 +97,7 @@
 
   var vid  = document.getElementById('introVid');
   var skip = document.getElementById('skip');
+  var tap  = document.getElementById('introTap');
   var done = false;
   function persist(){ try{ localStorage.setItem(KEY,'1'); }catch(e){} }
   function finish(){
@@ -107,19 +109,28 @@
   }
   // 仅「主动点跳过」才记忆，自然播完不锁死（便于反复查看开场）
   if(skip) skip.addEventListener('click', function(){ persist(); finish(); });
+  if(!vid){ finish(); return; }
 
-  // 播放开场视频：黑色背景上的文字心；结束 / 出错 / 被拦截 均进入正文
-  function start(){ if(vid){ vid.muted = true; vid.defaultMuted = true; vid.setAttribute('muted',''); var p = vid.play(); if(p && p.catch) p.catch(function(){}); } }
-  if(vid){
-    vid.addEventListener('ended', finish);
-    vid.addEventListener('error', finish);
-    // 部分浏览器需用户手势后才能播放：首次点击/触摸即尝试续播
-    document.addEventListener('pointerdown', function(){ start(); }, {once:true});
-    start();
-  } else {
-    finish();
+  // 带静音属性后尝试播放（iOS 要求 muted 才允许自动播放）
+  function play(){
+    vid.muted = true; vid.defaultMuted = true; vid.setAttribute('muted','');
+    var p = vid.play();
+    if(p && p.catch) p.catch(function(){});
   }
-  // 兜底：视频未触发 ended（暂停 / 隐藏 / 解码异常）时，最长 ~9.5s 强制进入正文
+  vid.addEventListener('ended', finish);
+  vid.addEventListener('error', finish);
+  vid.addEventListener('playing', function(){ if(tap) tap.style.display='none'; });
+
+  // 先尝试自动播放
+  play();
+  // 自动播放被拦截（iOS / 部分浏览器）：约 0.7s 后露出「轻触播放」提示
+  setTimeout(function(){
+    if(vid.paused && !done && tap){ tap.style.display='flex'; }
+  }, 700);
+  // 任意点击 / 触摸即用手势播放（移动端黑屏兜底）
+  intro.addEventListener('pointerdown', function(){ play(); if(tap) tap.style.display='none'; });
+
+  // 兜底：最长 ~9.5s 强制进入正文
   setTimeout(finish, 9500);
 })();
 </script>
