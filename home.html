@@ -323,22 +323,22 @@
         }
       }
 
-      // 心脏：红线汇聚中心，平时微光，每穿一条线短暂跳一下
+      // 心脏：红线汇聚中心，平时安静微光，每穿一条线短暂跳一下
       var sinceBeat = t - beatAt;
       var beat = (sinceBeat >= 0 && sinceBeat < 0.5) ? Math.sin(sinceBeat/0.5*Math.PI) : 0;
-      var hb = 1 + 0.6*beat;                       // 跳动时放大
+      var hb = 1 + 0.7*beat;                       // 跳动时明显放大
       var hA = gAll * (scat>0 ? Math.max(0,1-scat) : 1);
       if(hA > 0.02){
         ctx.save();
         ctx.globalAlpha = hA;
-        var grd = ctx.createRadialGradient(heartX, heartY, 0, heartX, heartY, 26*hb);
-        grd.addColorStop(0, 'rgba(255,80,90,0.92)');
-        grd.addColorStop(0.5, 'rgba(225,35,45,0.42)');
+        var grd = ctx.createRadialGradient(heartX, heartY, 0, heartX, heartY, 32*hb);
+        grd.addColorStop(0, 'rgba(255,80,90,0.95)');
+        grd.addColorStop(0.5, 'rgba(225,35,45,0.45)');
         grd.addColorStop(1, 'rgba(225,35,45,0)');
         ctx.fillStyle = grd;
-        ctx.beginPath(); ctx.arc(heartX, heartY, 26*hb, 0, 6.29); ctx.fill();
-        ctx.fillStyle = 'rgba(255,95,105,0.95)';
-        ctx.beginPath(); ctx.arc(heartX, heartY, 5*hb, 0, 6.29); ctx.fill();
+        ctx.beginPath(); ctx.arc(heartX, heartY, 32*hb, 0, 6.29); ctx.fill();
+        ctx.fillStyle = 'rgba(255,100,110,0.98)';
+        ctx.beginPath(); ctx.arc(heartX, heartY, 6.5*hb, 0, 6.29); ctx.fill();
         ctx.restore();
       }
 
