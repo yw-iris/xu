@@ -113,5 +113,40 @@
 </main>
 </div>
 
+<!-- BGM：隐藏视频音轨循环播放（进入页面自动播放，全站延续；首次交互兜底开声；静音状态跨页记忆） -->
+<audio id="bgm" src="assets/bgm.mp4" loop preload="auto" playsinline></audio>
+<button id="bgmToggle" class="bgm-toggle" type="button" aria-label="背景音乐 开/关" title="背景音乐">&#9834;</button>
+<script>
+(function(){
+  var bgm = document.getElementById('bgm');
+  var btn = document.getElementById('bgmToggle');
+  if(!bgm) return;
+  bgm.volume = 0.5;
+  var KEY = 'xu_bgm_off';
+  var on = localStorage.getItem(KEY) !== '1';
+  function applyBtn(){ if(btn) btn.classList.toggle('off', !on); }
+  applyBtn();
+  function tryPlay(){ if(on) bgm.play().catch(function(){}); }
+  tryPlay();
+  window.addEventListener('load', tryPlay);
+  function startOnce(){
+    tryPlay();
+    window.removeEventListener('pointerdown', startOnce);
+    window.removeEventListener('touchstart', startOnce);
+    window.removeEventListener('keydown', startOnce);
+  }
+  window.addEventListener('pointerdown', startOnce);
+  window.addEventListener('touchstart', startOnce);
+  window.addEventListener('keydown', startOnce);
+  if(btn) btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    on = !on;
+    localStorage.setItem(KEY, on ? '0' : '1');
+    applyBtn();
+    if(on) tryPlay(); else bgm.pause();
+  });
+})();
+</script>
+
 </body>
 </html>
