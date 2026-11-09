@@ -255,6 +255,15 @@
       ctx.setTransform(scale*dpr,0,0,scale*dpr,0,0);
       ctx.textBaseline = 'top';
       ctx.fillStyle = '#000'; ctx.fillRect(0,0,W,H);
+
+      // 整体搏动：每穿一条线，整个文字心脏围绕中心短暂胀缩一次
+      ctx.save();
+      var sinceBeat = t - beatAt;
+      var beat = (sinceBeat >= 0 && sinceBeat < 0.5) ? Math.sin(sinceBeat/0.5*Math.PI) : 0;
+      if(beat > 0){
+        var bs = 1 + 0.05*beat;
+        ctx.translate(W/2, H/2); ctx.scale(bs, bs); ctx.translate(-W/2, -H/2);
+      }
       var gAll = Math.min(1, t/0.5);                 // 整体淡入
       var scat = SCAT === Infinity ? 0 : Math.max(0, Math.min(1, (t-SCAT)/1.1)); // 快速消隐
 
@@ -323,24 +332,7 @@
         }
       }
 
-      // 心脏：红线汇聚中心，平时安静微光，每穿一条线短暂跳一下
-      var sinceBeat = t - beatAt;
-      var beat = (sinceBeat >= 0 && sinceBeat < 0.5) ? Math.sin(sinceBeat/0.5*Math.PI) : 0;
-      var hb = 1 + 0.7*beat;                       // 跳动时明显放大
-      var hA = gAll * (scat>0 ? Math.max(0,1-scat) : 1);
-      if(hA > 0.02){
-        ctx.save();
-        ctx.globalAlpha = hA;
-        var grd = ctx.createRadialGradient(heartX, heartY, 0, heartX, heartY, 32*hb);
-        grd.addColorStop(0, 'rgba(255,80,90,0.95)');
-        grd.addColorStop(0.5, 'rgba(225,35,45,0.45)');
-        grd.addColorStop(1, 'rgba(225,35,45,0)');
-        ctx.fillStyle = grd;
-        ctx.beginPath(); ctx.arc(heartX, heartY, 32*hb, 0, 6.29); ctx.fill();
-        ctx.fillStyle = 'rgba(255,100,110,0.98)';
-        ctx.beginPath(); ctx.arc(heartX, heartY, 6.5*hb, 0, 6.29); ctx.fill();
-        ctx.restore();
-      }
+      ctx.restore();   // 结束整体搏动缩放（每帧配对 save/restore）
 
       requestAnimationFrame(frame);
     }
