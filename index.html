@@ -32,8 +32,11 @@
     <a class="brand" href="home.html"><span class="dot"></span>絮<small>XÙ</small></a>
   </header>
 
-  <!-- 装饰刊头 Snowflakes.（无边框，开头絮下方） -->
-  <div class="snow"><img src="assets/snowflakes.jpg" alt="Snowflakes."></div>
+  <!-- 装饰刊头 Snowflakes.（点击图片→隐藏并原位播放视频，播完恢复图片） -->
+  <div class="snow" id="snowBox">
+    <img id="snowImg" src="assets/snowflakes.jpg" alt="Snowflakes.">
+    <video id="snowVid" class="snow-video" playsinline preload="none"></video>
+  </div>
 
   <!-- 细数我的罪 … 羽 骨 血 神（可长按牵引红线串联） -->
   <section class="sins fade d2">
@@ -301,6 +304,35 @@
 </script>
 
 
+
+<!-- 刊头图点击：隐藏图片 → 原位播放视频 → 播完恢复图片 -->
+<script>
+(function(){
+  var box = document.getElementById('snowBox');
+  var img = document.getElementById('snowImg');
+  var vid = document.getElementById('snowVid');
+  if(!box || !img || !vid) return;
+  // ★ 视频路径：待用户提供，直接替换 VIDEO_SRC 即可（文件放 assets/ 下）
+  var VIDEO_SRC = 'assets/snowflakes_clip.mp4';
+  vid.src = VIDEO_SRC;
+  function playClip(){
+    img.style.visibility = 'hidden';   // 保留占位、不跳动布局
+    vid.style.display = 'block';
+    vid.currentTime = 0;
+    var pr = vid.play();
+    if(pr && pr.catch) pr.catch(function(){});
+  }
+  function restore(){
+    vid.pause();
+    vid.style.display = 'none';
+    img.style.visibility = 'visible';
+  }
+  img.addEventListener('click', function(e){ e.preventDefault(); playClip(); });
+  vid.addEventListener('click', function(){ restore(); });        // 播放中点一下提前结束
+  vid.addEventListener('ended', restore);                          // 播完恢复图片
+  vid.addEventListener('error', restore);                          // 视频缺失/出错也回到图片
+})();
+</script>
 
 
 </body>
