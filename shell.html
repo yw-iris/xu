@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>絮 · 祷念</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden;}
+  #stage{position:fixed;inset:0;width:100%;height:100%;border:0;background:#000;display:block;z-index:1;}
+</style>
+</head>
+<body>
+<!-- 持久播放层：主 document 不随站内导航重载，音乐不断 -->
+<!-- 静音按钮放在 iframe 内的内容页里（避免被全屏 iframe 遮挡），通过 postMessage 控制下方音频 -->
+<audio id="bgm" src="assets/bgm.mp4" loop preload="auto" playsinline></audio>
+<iframe id="stage" src=""></iframe>
+<script>
+(function(){
+  var bgm = document.getElementById('bgm');
+  var btn = document.getElementById('bgmToggle');
+  var stage = document.getElementById('stage');
+  var KEY = 'xu_bgm_off';
+  var on = localStorage.getItem(KEY) !== '1';
+  bgm.volume = 0.5;
+  function applyBtn(){ if(btn) btn.classList.toggle('off', !on); }  // 按钮在 iframe 内，shell 无自身按钮时安全跳过
+  applyBtn();
+  function tryPlay(){ if(on) bgm.play().catch(function(){}); }
+  tryPlay();                                      // 进入即尝试自动播放
+  window.addEventListener('load', tryPlay);
+  function startOnce(){                           // 首次交互兜底开声
+    tryPlay();
+    window.removeEventListener('pointerdown', startOnce);
+    window.removeEventListener('touchstart', startOnce);
+    window.removeEventListener('keydown', startOnce);
+  }
+  window.addEventListener('pointerdown', startOnce);
+  window.addEventListener('touchstart', startOnce);
+  window.addEventListener('keydown', startOnce);
+  if(btn) btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    on = !on;
+    localStorage.setItem(KEY, on ? '0' : '1');
+    applyBtn();
+    if(on) tryPlay(); else bgm.pause();
+  });
+  // 初始页面：?p=xxx，默认 index.html（仅允许本站相对路径）
+  var p = new URLSearchParams(location.search).get('p');
+  if(!p || /^https?:/.test(p) || p.charAt(0) === '/' || p.indexOf('..') >= 0){ p = 'index.html'; }
+  stage.src = p;
+  // 接收 iframe 内发来的导航 / 交互 / 静音信号
+  window.addEventListener('message', function(e){
+    var d = e.data || {};
+    if(d.type === 'xu-nav'){
+      if(/\.html/.test(d.href) && d.href.charAt(0) !== '/' && !/^https?:/.test(d.href)){
+        stage.src = d.href;
+        history.replaceState(null, '', '?p=' + d.href);
+      }
+    } else if(d.type === 'xu-gesture'){
+      tryPlay();                                  // iframe 内首次交互 → 开声
+    } else if(d.type === 'xu-mute'){
+      on = !on;
+      localStorage.setItem(KEY, on ? '0' : '1');
+      if(on) tryPlay(); else bgm.pause();
+      if(stage.contentWindow) stage.contentWindow.postMessage({type:'xu-mute-state', on:on}, '*'); // 回传状态给按钮
+    }
+  });
+})();
+</script>
+</body>
+</html>
