@@ -167,13 +167,13 @@
 (function(){
   var intro = document.getElementById('intro');
   if(!intro) return;
-  var KEY = 'xu_intro_v5';
+  var KEY = 'xu_intro_v6';
   var force = /[?&]intro\b/.test(location.search);
-  if(!force && localStorage.getItem(KEY)){ intro.parentNode.removeChild(intro); return; }
+  if(!force && sessionStorage.getItem(KEY)){ intro.parentNode.removeChild(intro); return; }
 
   var skip = document.getElementById('skip');
   var done = false, started = performance.now();
-  function persist(){ try{ localStorage.setItem(KEY,'1'); }catch(e){} }
+  function persist(){ try{ sessionStorage.setItem(KEY,'1'); }catch(e){} }
   function finish(){
     if(done) return; done = true;
     intro.classList.add('gone');
