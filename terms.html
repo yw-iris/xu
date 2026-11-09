@@ -116,6 +116,7 @@
 <!-- BGM：隐藏视频音轨循环播放（进入页面自动播放，全站延续；首次交互兜底开声；静音状态跨页记忆） -->
 <!-- BGM：iframe 壳承载时由 shell 统一播放；独立打开时自播；静音跨页记忆 -->
 <!-- BGM：iframe 壳承载时由 shell 统一播放；独立打开时自播；静音跨页记忆 -->
+<!-- BGM：iframe 壳承载时由 shell 统一播放；独立打开时自播；静音跨页记忆 -->
 <audio id="bgm" src="assets/bgm.mp4" loop preload="auto" playsinline></audio>
 <button id="bgmToggle" class="bgm-toggle" type="button" aria-label="背景音乐 开/关" title="背景音乐">♪</button>
 <script>
@@ -148,8 +149,11 @@
     if(btn){ btn.classList.toggle('off', !on);
       btn.addEventListener('click', function(e){ e.stopPropagation(); parent.postMessage({type:'xu-mute'}, '*'); });
     }
-    // 首次交互 → 通知 shell 开声
-    document.addEventListener('pointerdown', function(){ parent.postMessage({type:'xu-gesture'}, '*'); });
+    // 首次交互（点/触/击）→ 通知 shell 立即开声（移动端 touchstart 更可靠）
+    function fwdGesture(){ parent.postMessage({type:'xu-gesture'}, '*'); }
+    document.addEventListener('pointerdown', fwdGesture, {once:true});
+    document.addEventListener('touchstart', fwdGesture, {once:true});
+    document.addEventListener('click', fwdGesture, {once:true});
     // 接收 shell 的静音状态回传
     window.addEventListener('message', function(e){ var d=e.data||{}; if(d.type==='xu-mute-state' && btn){ btn.classList.toggle('off', !d.on); } });
     return;
@@ -171,6 +175,7 @@
   if(btn) btn.addEventListener('click', function(e){ e.stopPropagation(); on=!on; localStorage.setItem(KEY, on?'0':'1'); applyBtn(); if(on) tryPlay(); else bgm.pause(); });
 })();
 </script>
+
 
 
 
