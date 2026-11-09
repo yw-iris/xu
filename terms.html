@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>须知 · TERMS — 絮</title>
 <link rel="stylesheet" href="css/style.css">
+<script>
+// 字体异步加载：绝不阻塞渲染与脚本（原@import已移除）
+(function(){
+  function addFont(){ var l=document.createElement('link'); l.rel='stylesheet';
+    l.href='https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@400;600&display=swap';
+    document.head.appendChild(l); }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addFont);
+  else addFont();
+})();
+</script>
 </head>
 <body>
 
