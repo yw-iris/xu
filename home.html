@@ -303,8 +303,8 @@
       var beatDY = 0, beatFS = 1;
       if(beatAt >= 0){
         var bt = t - beatAt;
-        if(bt >= 0 && bt < 1.2){
-          var bk = Math.sin((bt/1.2)*Math.PI);  // 0→1→0 单峰脉冲
+        if(bt >= 0 && bt < 0.6){
+          var bk = Math.sin((bt/0.6)*Math.PI);  // 0→1→0 单峰脉冲
           beatDY = -34*bk;                       // 整团文字上弹 34px（心脏跳一下）
           beatFS = 1 + 0.22*bk;                  // 字形放大 22%
         }
@@ -378,8 +378,8 @@
       // 心跳脉冲：扯直瞬间心脏跳一下（一次大幅扩散红环 + 中心光团）
       if(beatAt >= 0){
         var bt = t - beatAt;
-        if(bt >= 0 && bt < 1.2){
-          var bp = bt/1.2, ringA = 1 - bp;
+        if(bt >= 0 && bt < 0.6){
+          var bp = bt/0.6, ringA = 1 - bp;
           // 中心脉冲光团（先亮后散）
           var g = ctx.createRadialGradient(heartX, heartY, 0, heartX, heartY, 26*(1-bp*0.7)+8);
           g.addColorStop(0, RED + (200*ringA) + ')');
