@@ -132,6 +132,15 @@
     var W = L.W, H = L.H, words = L.words, nodes = L.nodes, anchors = L.anchors;
     var nodeSet = {}; nodes.forEach(function(n){ nodeSet[n.x + ',' + n.y] = true; });
 
+    // ---- 十字架（从素材抠出，置于心脏上方；红线起点=十字架中心）----
+    var crossImg = new Image(); crossImg.src = 'assets/cross.png';
+    var CROSS_W = 238, CROSS_H = 293;          // 抠图后实际像素尺寸
+    var crossX = 284, crossY = 25, crossS = 0.42; // 逻辑坐标：中心 & 缩放(逻辑px/像素)
+    var armFx = 117/CROSS_W, armFy = 137/CROSS_H; // 十字架臂交点(中心)在图中的相对位置
+    var crossCx = crossX + (armFx-0.5)*CROSS_W*crossS;
+    var crossCy = crossY + (armFy-0.5)*CROSS_H*crossS;
+    anchors[0] = [crossCx, crossCy];           // 红线从十字架中心起笔
+
     // ---- catmull 松弛曲线 & 拉紧折线（同参数化采样）----
     function catmull(pts, per){
       var P = [pts[0]].concat(pts, [pts[pts.length-1]]), out = [];
@@ -235,6 +244,14 @@
         ctx.fillText(w[4], w[0]+dx, w[1]+dy);
       }
       ctx.globalAlpha = 1;
+
+      // 十字架（绘于文字之上、红线之下，红线从其臂交点发出）
+      if(crossImg.complete && crossImg.naturalWidth){
+        var cw = CROSS_W*crossS, ch = CROSS_H*crossS;
+        ctx.globalAlpha = gAll;
+        ctx.drawImage(crossImg, crossX - cw/2, crossY - ch/2, cw, ch);
+        ctx.globalAlpha = 1;
+      }
 
       // 丝线（垂落更慢 + 拉紧动画）
       tight += (tightTarget - tight)*0.14;
