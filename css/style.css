@@ -623,7 +623,7 @@ a{color:inherit;text-decoration:none;}
 .enter-btn:hover .ar{transform:translateX(4px);}
 
 /* BGM 静音开关：右下角，位于「进入档案」按钮正上方 */
-.bgm-toggle{position:fixed;right:16px;bottom:62px;z-index:60;width:30px;height:30px;
+.bgm-toggle{position:fixed;right:16px;bottom:62px;z-index:10001;width:30px;height:30px;
   border:1px solid var(--line);background:rgba(10,10,12,.55);color:var(--ink-dim);
   font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;
   cursor:pointer;transition:.3s var(--ease);backdrop-filter:blur(2px);border-radius:2px;}
