@@ -108,7 +108,15 @@
   var hint = document.getElementById('linkHint');
   if(!wrap || !cv) return;
   var cards = Array.prototype.slice.call(wrap.querySelectorAll('.trace'));
+  var keys  = Array.prototype.slice.call(document.querySelectorAll('.sin-keys span')); // 羽 骨 血 神，顺序与 cards 对应
   var ctx = cv.getContext('2d');
+
+  // 任一碎片被红线连上 → 底部对应字点亮变红；断开（连线清空）则还原
+  function refreshKeys(){
+    var lit = {};
+    links.forEach(function(l){ lit[l.a] = 1; lit[l.b] = 1; });
+    for(var i=0;i<keys.length;i++){ keys[i].classList.toggle('lit', !!lit[i]); }
+  }
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
 
   var links = [];        // 已连成的红线 {a, b}
@@ -149,6 +157,7 @@
       var a = center(l.a), b = center(l.b);
       line(a, b, 0.82); dot(b, 2.6, 0.9);
     });
+    refreshKeys();
   }
   // 是否已存在该无序对（避免同对重复叠线；不同对、多重连接均允许）
   function pairExists(a, b){
