@@ -259,7 +259,7 @@
       // 整体搏动：每穿一条线，整个文字心脏向上弹跳并轻微胀大一次
       ctx.save();
       var sinceBeat = t - beatAt;
-      var beat = (sinceBeat >= 0 && sinceBeat < 0.5) ? Math.sin(sinceBeat/0.5*Math.PI) : 0;
+      var beat = (sinceBeat >= 0 && sinceBeat < 0.3) ? Math.sin(sinceBeat/0.3*Math.PI) : 0;
       if(beat > 0){
         var jb = 22*beat;                  // 向上跳的位移(逻辑px)
         var sc = 1 + 0.04*beat;            // 轻微胀大
