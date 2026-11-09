@@ -33,6 +33,36 @@
   <button class="skip" id="skip" type="button">跳过 ›</button>
 </div>
 
+<!-- BGM：隐藏视频音轨循环播放（首次用户交互后开声） -->
+<audio id="bgm" src="assets/bgm.mp4" loop preload="auto" playsinline></audio>
+<button id="bgmToggle" class="bgm-toggle" type="button" aria-label="背景音乐 开/关" title="背景音乐">♪</button>
+<script>
+(function(){
+  var bgm = document.getElementById('bgm');
+  var btn = document.getElementById('bgmToggle');
+  if(!bgm) return;
+  bgm.volume = 0.5;
+  var on = true;
+  function tryPlay(){ if(on) bgm.play().catch(function(){}); }
+  function startOnce(){
+    tryPlay();
+    window.removeEventListener('pointerdown', startOnce);
+    window.removeEventListener('touchstart', startOnce);
+    window.removeEventListener('keydown', startOnce);
+  }
+  // 浏览器禁止无声自动播放 → 首次交互后开声
+  window.addEventListener('pointerdown', startOnce);
+  window.addEventListener('touchstart', startOnce);
+  window.addEventListener('keydown', startOnce);
+  if(btn) btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    on = !on;
+    btn.classList.toggle('off', !on);
+    if(on) tryPlay(); else bgm.pause();
+  });
+})();
+</script>
+
 
 
 <div class="device">
