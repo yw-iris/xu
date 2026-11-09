@@ -25,24 +25,37 @@
   bgm.volume = 0.5;
   function applyBtn(){ if(btn) btn.classList.toggle('off', !on); }  // 按钮在 iframe 内，shell 无自身按钮时安全跳过
   applyBtn();
-  function tryPlay(){ if(on) bgm.play().catch(function(){}); }
-  tryPlay();                                      // 进入即尝试自动播放
-  window.addEventListener('load', tryPlay);
-  function startOnce(){                           // 首次交互兜底开声
-    tryPlay();
-    window.removeEventListener('pointerdown', startOnce);
-    window.removeEventListener('touchstart', startOnce);
-    window.removeEventListener('keydown', startOnce);
+  // 带声起播；若被浏览器自动播放策略拦截 → 先静音起播（浏览器允许），待首次手势再开声
+  function startWithSound(){
+    if(!on) return;
+    var p = bgm.play();
+    if(p && p.catch){
+      p.catch(function(){
+        bgm.muted = true;
+        bgm.play().catch(function(){});
+      });
+    }
   }
-  window.addEventListener('pointerdown', startOnce);
-  window.addEventListener('touchstart', startOnce);
-  window.addEventListener('keydown', startOnce);
+  function unmuteOnGesture(){                      // 首次手势：解除静音并起播（处于手势上下文，必成功）
+    if(!on) return;
+    if(bgm.muted) bgm.muted = false;
+    bgm.play().catch(function(){});
+  }
+  startWithSound();                                // 进入即尝试起播
+  window.addEventListener('load', startWithSound);
+  bgm.addEventListener('loadeddata', startWithSound);
+  bgm.addEventListener('canplay', startWithSound);
+  // shell 顶层兜底：首次手势立即开声（iframe 内由 xu-gesture 转发）
+  function firstGesture(){ unmuteOnGesture(); }
+  window.addEventListener('pointerdown', firstGesture, {once:true});
+  window.addEventListener('touchstart', firstGesture, {once:true});
+  window.addEventListener('keydown', firstGesture, {once:true});
   if(btn) btn.addEventListener('click', function(e){
     e.stopPropagation();
     on = !on;
     localStorage.setItem(KEY, on ? '0' : '1');
     applyBtn();
-    if(on) tryPlay(); else bgm.pause();
+    if(on) unmuteOnGesture(); else bgm.pause();
   });
   // 初始页面：?p=xxx，默认 index.html（仅允许本站相对路径）
   var p = new URLSearchParams(location.search).get('p');
@@ -57,11 +70,11 @@
         history.replaceState(null, '', '?p=' + d.href);
       }
     } else if(d.type === 'xu-gesture'){
-      tryPlay();                                  // iframe 内首次交互 → 开声
+      unmuteOnGesture();                           // iframe 内首次交互 → 立即开声
     } else if(d.type === 'xu-mute'){
       on = !on;
       localStorage.setItem(KEY, on ? '0' : '1');
-      if(on) tryPlay(); else bgm.pause();
+      if(on) unmuteOnGesture(); else bgm.pause();
       if(stage.contentWindow) stage.contentWindow.postMessage({type:'xu-mute-state', on:on}, '*'); // 回传状态给按钮
     }
   });
