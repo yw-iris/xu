@@ -32,19 +32,15 @@
     <a class="brand" href="home.html"><span class="dot"></span>絮<small>XÙ</small></a>
   </header>
 
-  <!-- 装饰刊头 Snowflakes.（点击图片→隐藏并原位播放视频，播完恢复图片） -->
+  <!-- 装饰刊头 Snowflakes.（点击 → 血液从图片底下流出） -->
   <div class="snow" id="snowBox">
     <img id="snowImg" src="assets/snowflakes.jpg" alt="Snowflakes.">
-    <video id="snowVid" class="snow-video" playsinline preload="none"></video>
   </div>
 
   <!-- 细数我的罪 … 羽 骨 血 神（可长按牵引红线串联） -->
   <section class="sins fade d2">
     <div class="kicker"><span class="n">04</span> Index · 碎片索引</div>
     <div class="sins-title">细数我的罪 …</div>
-
-    <!-- 红线交互提示：置于标题下、卡片之上的醒目位置（非页底） -->
-    <p class="link-hint" id="linkHint"><span class="hint-main"><b>双击</b>任意碎片选中，再<b>点击</b>另一块 · 红线即连成</span><span class="hint-sub">（可任意多重连接 · 点 ↗ 打开详情）</span></p>
 
     <div class="traces" id="traces">
       <!-- 红线画在卡片之下（z-index 低于卡片），只从卡片间的缝隙透出，绝不遮挡卡片上层 -->
@@ -103,28 +99,15 @@
 
 </div>
 
-<!-- ============ 交互红线：双击碎片选中，再点击另一块即连成红线 ============ -->
+<!-- ============ 常驻命运之线：四个碎片依次被红线串联 + 依次掉落出场 ============ -->
 <script>
 (function(){
   var wrap = document.getElementById('traces');
   var cv   = document.getElementById('thread');
-  var hint = document.getElementById('linkHint');
   if(!wrap || !cv) return;
-  var cards = Array.prototype.slice.call(wrap.querySelectorAll('.trace'));
-  var keys  = Array.prototype.slice.call(document.querySelectorAll('.sin-keys span')); // 羽 骨 血 神，顺序与 cards 对应
+  var cards = Array.prototype.slice.call(wrap.querySelectorAll('.trace')); // 羽 骨 血 神
   var ctx = cv.getContext('2d');
-
-  // 任一碎片被红线连上 → 底部对应字点亮变红；断开（连线清空）则还原
-  function refreshKeys(){
-    var lit = {};
-    links.forEach(function(l){ lit[l.a] = 1; lit[l.b] = 1; });
-    for(var i=0;i<keys.length;i++){ keys[i].classList.toggle('lit', !!lit[i]); }
-  }
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-  var links = [];        // 已连成的红线 {a, b}
-  var sel   = -1;        // 当前选中的源卡片下标（-1 未选）
-  var DEFAULT_HINT = hint ? hint.innerHTML : '';
 
   function wrapRect(){ return wrap.getBoundingClientRect(); }
   function size(){
@@ -133,108 +116,57 @@
     cv.width  = Math.round(r.width*dpr);
     cv.height = Math.round(r.height*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
-    draw();
   }
   function center(i){
     var r = cards[i].getBoundingClientRect();
     var w = wrapRect();
     return { x:(r.left+r.right)/2 - w.left, y:(r.top+r.bottom)/2 - w.top };
   }
-  function dot(p, rad, a){
-    ctx.fillStyle = 'rgba(224,16,34,'+a+')';
-    ctx.beginPath(); ctx.arc(p.x, p.y, rad, 0, Math.PI*2); ctx.fill();
-  }
-  function line(a, b, a1){
+
+  // —— 依次掉落出场：四块碎片按 150/450/750/1050ms 依次落下 ——
+  var DROPS = [150, 450, 750, 1050];
+  cards.forEach(function(el, i){
+    el.classList.add('drop');
+    el.style.animationDelay = DROPS[i] + 'ms';
+    el.addEventListener('animationend', function(){
+      el.classList.remove('drop');
+      el.style.animation = '';
+      el.style.opacity = '1';
+    }, {once:true});
+  });
+
+  // —— 常驻红线：碎片落地后，命运之线按 01→02→03→04 依次缝连，永久保留 ——
+  var born = performance.now();
+  function draw(){
+    var t = (performance.now() - born)/1000;
+    var r = wrapRect();
+    if(!r.width) return;
+    ctx.clearRect(0, 0, r.width, r.height);
     ctx.lineCap = 'round';
-    ctx.strokeStyle = 'rgba(224,16,34,'+a1+')';
+    ctx.strokeStyle = 'rgba(224,16,34,.8)';
     ctx.lineWidth = 1.7;
     ctx.shadowColor = 'rgba(224,16,34,.45)'; ctx.shadowBlur = 7;
-    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    for(var i=0; i<cards.length-1; i++){
+      var land = DROPS[i]/1000 + 0.6;               // 第 i 块落定后线才开始缝
+      var p = Math.max(0, Math.min(1, (t - land)/0.5));
+      if(p <= 0) continue;
+      var a = center(i), b = center(i+1);
+      var ex = a.x + (b.x-a.x)*p, ey = a.y + (b.y-a.y)*p;
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(ex, ey); ctx.stroke();
+      ctx.fillStyle = 'rgba(224,16,34,.9)';
+      ctx.beginPath(); ctx.arc(ex, ey, 2.6, 0, Math.PI*2); ctx.fill();
+    }
     ctx.shadowBlur = 0;
   }
-  function draw(){
-    var r = wrapRect();
-    ctx.clearRect(0,0,r.width,r.height);
-    // 已连成的命运之线（在卡片之下，仅缝隙可见）
-    links.forEach(function(l){
-      var a = center(l.a), b = center(l.b);
-      line(a, b, 0.82); dot(b, 2.6, 0.9);
-    });
-    refreshKeys();
-  }
-  // 是否已存在该无序对（避免同对重复叠线；不同对、多重连接均允许）
-  function pairExists(a, b){
-    for(var i=0;i<links.length;i++){
-      var l = links[i];
-      if((l.a===a && l.b===b) || (l.a===b && l.b===a)) return true;
-    }
-    return false;
-  }
-  function setSel(i){
-    if(sel >= 0) cards[sel].classList.remove('selected');
-    sel = i;
-    if(sel >= 0) cards[sel].classList.add('selected');
-  }
-  function clearSel(){ setSel(-1); }
-
-  function toggle(i){
-    if(sel === -1){
-      // 双击：选中该碎片（红边框变粗 = 待连线）
-      setSel(i);
-      if(hint) hint.innerHTML = '已选中 <b>'+(i+1)+'号</b> 碎片 · 再点击另一块连成红线';
-    } else if(sel === i){
-      // 双击同一块：取消选择
-      clearSel();
-      if(hint) hint.innerHTML = DEFAULT_HINT;
-    } else {
-      // 双击另一块：也直接连成（与「单击连接」等价）
-      var ok = !pairExists(sel, i);
-      if(ok) links.push({ a:sel, b:i });
-      clearSel();
-      if(ok && hint) hint.innerHTML = '已连 <b>'+links.length+'</b> 条命运之线 · 继续双击选中、点击连成';
-      draw();
-    }
-  }
-
-  cards.forEach(function(el, i){
-    el.style.touchAction = 'manipulation';
-    el.addEventListener('dragstart', function(e){ e.preventDefault(); });
-    el.addEventListener('contextmenu', function(e){ e.preventDefault(); });
-    // 单击：仅当已选中一块时，点另一块即连成红线；点击「进入 / ↗」放行进入详情页
-    el.addEventListener('click', function(e){
-      if(e.target.closest('.ar') || e.target.closest('.enter')) return;   // 进入 / ↗：放行，打开详情页
-      e.preventDefault();
-      if(sel >= 0 && sel !== i){
-        var ok = !pairExists(sel, i);
-        if(ok) links.push({ a:sel, b:i });
-        clearSel();
-        if(ok && hint) hint.innerHTML = '已连 <b>'+links.length+'</b> 条命运之线 · 继续双击选中、点击连成';
-        draw();
-      }
-    });
-    // 双击：选中 / 取消选中该碎片（点在「进入 / ↗」上时放行导航）
-    el.addEventListener('dblclick', function(e){
-      if(e.target.closest('.ar') || e.target.closest('.enter')) return;
-      e.preventDefault();
-      toggle(i);
-    });
-    // 已选一块时，悬停另一块预览为连线目标（粗红框）
-    el.addEventListener('mouseenter', function(){
-      if(sel >= 0 && sel !== i) el.classList.add('link-target');
-    });
-    el.addEventListener('mouseleave', function(){
-      el.classList.remove('link-target');
-    });
-  });
-
-  // 点击空白处取消当前选择
-  window.addEventListener('click', function(e){
-    if(!e.target.closest('.trace')) clearSel();
-  });
+  (function loop(){
+    draw();
+    var t = (performance.now() - born)/1000;
+    if(t < 4.5){ requestAnimationFrame(loop); }      // 出场动画结束后红线已全部缝成
+  })();
 
   window.addEventListener('resize', size);
   requestAnimationFrame(size);
-  setTimeout(size, 350);
+  setTimeout(size, 400);
 })();
 </script>
 
@@ -305,32 +237,29 @@
 
 
 
-<!-- 刊头图点击：隐藏图片 → 原位播放视频 → 播完恢复图片 -->
+<!-- 刊头图点击：血液从图片底下流出（浸润式血涌，几秒后渗尽消散） -->
 <script>
 (function(){
   var box = document.getElementById('snowBox');
   var img = document.getElementById('snowImg');
-  var vid = document.getElementById('snowVid');
-  if(!box || !img || !vid) return;
-  // ★ 视频路径：待用户提供，直接替换 VIDEO_SRC 即可（文件放 assets/ 下）
-  var VIDEO_SRC = 'assets/snowflakes_clip.mp4';
-  vid.src = VIDEO_SRC;
-  function playClip(){
-    img.style.visibility = 'hidden';   // 保留占位、不跳动布局
-    vid.style.display = 'block';
-    vid.currentTime = 0;
-    var pr = vid.play();
-    if(pr && pr.catch) pr.catch(function(){});
-  }
-  function restore(){
-    vid.pause();
-    vid.style.display = 'none';
-    img.style.visibility = 'visible';
-  }
-  img.addEventListener('click', function(e){ e.preventDefault(); playClip(); });
-  vid.addEventListener('click', function(){ restore(); });        // 播放中点一下提前结束
-  vid.addEventListener('ended', restore);                          // 播完恢复图片
-  vid.addEventListener('error', restore);                          // 视频缺失/出错也回到图片
+  if(!box || !img) return;
+  img.addEventListener('click', function(e){
+    e.preventDefault();
+    if(box.querySelector('.blood-pour')) return;      // 正在流血时不重复触发
+    var p = document.createElement('div');
+    p.className = 'blood-pour';
+    for(var i=0;i<9;i++){                             // 9 股粗细/位置/快慢随机的血流
+      var s = document.createElement('i');
+      s.style.left = (4 + Math.random()*88) + '%';
+      s.style.width = (5 + Math.random()*10) + 'px';
+      s.style.height = (35 + Math.random()*115) + 'px';
+      s.style.animationDelay = (Math.random()*0.35) + 's';
+      p.appendChild(s);
+    }
+    box.appendChild(p);
+    setTimeout(function(){ p.classList.add('out'); }, 3200);   // 流尽后渗散
+    setTimeout(function(){ if(p.parentNode) p.parentNode.removeChild(p); }, 4600);
+  });
 })();
 </script>
 
