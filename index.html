@@ -237,7 +237,7 @@
 
 
 
-<!-- 刊头图点击：血液从图片底下流出（浸润式血涌，几秒后渗尽消散） -->
+<!-- 刊头图点击：血液从图片底下流出（参考血迹笔刷：锯齿血毯 + 垂流 + 血珠 + 溅点，随机生成） -->
 <script>
 (function(){
   var box = document.getElementById('snowBox');
@@ -246,23 +246,73 @@
   img.addEventListener('click', function(e){
     e.preventDefault();
     if(box.querySelector('.blood-pour')) return;      // 正在流血时不重复触发
+    var NS = 'http://www.w3.org/2000/svg';
+    var W = img.clientWidth || 380, Hh = 300;
+    function rnd(a,b){ return a + Math.random()*(b-a); }
+    var svg = document.createElementNS(NS,'svg');
+    svg.setAttribute('viewBox','0 0 '+W+' '+Hh);
+    svg.setAttribute('class','blood-svg');
+    var g = document.createElementNS(NS,'g');
+    var COL = '#9e1220';
+
+    // —— 主体血毯：上缘贴住图片底边，下缘为随机锯齿 + 深垂口 ——
+    var edge = 'M0,0 L'+W+',0 L'+W+',28 ';
+    var x = W, y = 28;
+    while(x > 0){
+      var step = rnd(14, 42), nx = Math.max(0, x-step);
+      if(Math.random() < 0.24){                       // 深垂的锯齿口
+        var dy = rnd(45, 115);
+        edge += ' Q'+x+','+(y+dy)+' '+(x-step*0.5)+','+(y+dy)+
+                ' Q'+nx+','+(y+dy)+' '+nx+','+(y+rnd(10,38))+' ';
+        y += rnd(6, 24); if(y > 95) y = 95;
+      } else {                                        // 普通起伏
+        y = Math.max(12, Math.min(95, y+rnd(-16,16)));
+        edge += ' Q'+((x+nx)/2)+','+(y+rnd(-8,10))+' '+nx+','+y+' ';
+      }
+      x = nx;
+    }
+    edge += 'L0,28 Z';
+    var mass = document.createElementNS(NS,'path');
+    mass.setAttribute('d', edge);
+    mass.setAttribute('fill', COL);
+    g.appendChild(mass);
+
+    // —— 垂流：粗细长短不一的细长血柱，部分底端带脱离的血珠 ——
+    for(var i=0;i<14;i++){
+      var dx0 = rnd(6, W-6), len = rnd(50, 225), wdt = rnd(2.5, 10);
+      var d = 'M'+(dx0-wdt/2)+',22 L'+(dx0+wdt/2)+',22'+
+              ' L'+(dx0+wdt*0.32)+','+(22+len-10)+
+              ' Q'+dx0+','+(22+len+9)+' '+(dx0-wdt*0.32)+','+(22+len-10)+' Z';
+      var p2 = document.createElementNS(NS,'path');
+      p2.setAttribute('d', d); p2.setAttribute('fill', COL);
+      g.appendChild(p2);
+      if(Math.random() < 0.5){
+        var c = document.createElementNS(NS,'circle');
+        c.setAttribute('cx', dx0+rnd(-3,3));
+        c.setAttribute('cy', 22+len+rnd(10,42));
+        c.setAttribute('r', rnd(1.6, 4));
+        c.setAttribute('fill', COL);
+        g.appendChild(c);
+      }
+    }
+
+    // —— 溅点：散落的细小血滴 ——
+    for(var j=0;j<26;j++){
+      var c2 = document.createElementNS(NS,'circle');
+      c2.setAttribute('cx', rnd(0, W));
+      c2.setAttribute('cy', rnd(28, Hh));
+      c2.setAttribute('r', rnd(0.8, 3.2));
+      c2.setAttribute('fill', COL);
+      g.appendChild(c2);
+    }
+
+    svg.appendChild(g);
     var p = document.createElement('div');
     p.className = 'blood-pour';
-    var pool = document.createElement('span');       // 血滩：沿图片底边横向蔓延
-    pool.className = 'pool';
-    p.appendChild(pool);
-    for(var i=0;i<9;i++){                             // 9 股粗细/位置/快慢随机的血流
-      var s = document.createElement('i');
-      s.style.left = (4 + Math.random()*88) + '%';
-      s.style.width = (5 + Math.random()*10) + 'px';
-      s.style.height = (35 + Math.random()*115) + 'px';
-      s.style.animationDelay = (Math.random()*0.35) + 's';
-      s.style.rotate = (Math.random()*5 - 2.5) + 'deg';   // 轻微歪斜 → 不规则流体感
-      p.appendChild(s);
-    }
+    p.appendChild(svg);
     box.appendChild(p);
-    setTimeout(function(){ p.classList.add('out'); }, 3200);   // 流尽后渗散
-    setTimeout(function(){ if(p.parentNode) p.parentNode.removeChild(p); }, 4600);
+    setTimeout(function(){ p.classList.add('out'); }, 3400);   // 流尽后渗散
+    setTimeout(function(){ if(p.parentNode) p.parentNode.removeChild(p); }, 4800);
   });
 })();
 </script>
