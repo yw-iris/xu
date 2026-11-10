@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 487 1080" width="487" height="1080">
+  <!-- 描图：4 只乌鸦（黑填充）+ 3 条红线（带红点）。背景透明，可叠在任意底色上。 -->
+  <defs>
+    <g id="crow">
+      <ellipse cx="60" cy="32" rx="18" ry="9"/>
+      <circle cx="38" cy="28" r="8"/>
+      <polygon points="30,25 16,28 30,31"/>
+      <polygon points="76,28 104,22 100,41 77,34"/>
+      <path d="M52,25 Q30,3 8,15 Q33,22 50,31 Z"/>
+      <path d="M68,25 Q92,1 116,13 Q91,21 70,31 Z"/>
+    </g>
+  </defs>
+
+  <g fill="#0a0a0a">
+    <use href="#crow" transform="translate(105,287) rotate(-18) scale(.95) translate(-60,-32)"/>
+    <use href="#crow" transform="translate(200,365) rotate(6)   scale(.90) translate(-60,-32)"/>
+    <use href="#crow" transform="translate(322,480) rotate(-3)  scale(1.15) translate(-60,-32)"/>
+    <use href="#crow" transform="translate(360,592) rotate(22)  scale(.92) translate(-60,-32)"/>
+  </g>
+
+  <g fill="none" stroke="#c81e2a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M75,270 Q150,410 230,560"/>
+    <path d="M268,530 Q236,596 205,660"/>
+    <path d="M225,450 Q231,520 236,590"/>
+  </g>
+  <g fill="#c81e2a">
+    <circle cx="75"  cy="270" r="4.2"/>
+    <circle cx="230" cy="560" r="4.2"/>
+    <circle cx="268" cy="530" r="4.2"/>
+    <circle cx="205" cy="660" r="4.2"/>
+    <circle cx="225" cy="450" r="4.2"/>
+    <circle cx="236" cy="590" r="4.2"/>
+    <circle cx="345" cy="415" r="3.6"/>
+    <circle cx="205" cy="300" r="3.6"/>
+  </g>
+</svg>
