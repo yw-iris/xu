@@ -247,7 +247,7 @@
     e.preventDefault();
     if(box.querySelector('.blood-pour')) return;      // 正在流血时不重复触发
     var NS = 'http://www.w3.org/2000/svg';
-    var W = img.clientWidth || 380, Hh = 190;
+    var W = img.clientWidth || 380, Hh = 135;
     function rnd(a,b){ return a + Math.random()*(b-a); }
     var svg = document.createElementNS(NS,'svg');
     svg.setAttribute('viewBox','0 0 '+W+' '+Hh);
@@ -261,10 +261,10 @@
     while(x > 0){
       var step = rnd(14, 42), nx = Math.max(0, x-step);
       if(Math.random() < 0.24){                       // 深垂的锯齿口
-        var dy = rnd(45, 115);
+        var dy = rnd(30, 80);
         edge += ' Q'+x+','+(y+dy)+' '+(x-step*0.5)+','+(y+dy)+
                 ' Q'+nx+','+(y+dy)+' '+nx+','+(y+rnd(10,38))+' ';
-        y += rnd(6, 24); if(y > 95) y = 95;
+        y += rnd(6, 24); if(y > 72) y = 72;
       } else {                                        // 普通起伏
         y = Math.max(12, Math.min(95, y+rnd(-16,16)));
         edge += ' Q'+((x+nx)/2)+','+(y+rnd(-8,10))+' '+nx+','+y+' ';
@@ -278,8 +278,8 @@
     g.appendChild(mass);
 
     // —— 垂流：粗细长短不一的细长血柱，部分底端带脱离的血珠 ——
-    for(var i=0;i<14;i++){
-      var dx0 = rnd(6, W-6), len = rnd(32, 120), wdt = rnd(2.5, 10);
+    for(var i=0;i<8;i++){
+      var dx0 = rnd(6, W-6), len = rnd(20, 78), wdt = rnd(2.5, 10);
       var d = 'M'+(dx0-wdt/2)+',22 L'+(dx0+wdt/2)+',22'+
               ' L'+(dx0+wdt*0.32)+','+(22+len-10)+
               ' Q'+dx0+','+(22+len+9)+' '+(dx0-wdt*0.32)+','+(22+len-10)+' Z';
@@ -297,7 +297,7 @@
     }
 
     // —— 溅点：散落的细小血滴 ——
-    for(var j=0;j<26;j++){
+    for(var j=0;j<13;j++){
       var c2 = document.createElementNS(NS,'circle');
       c2.setAttribute('cx', rnd(0, W));
       c2.setAttribute('cy', rnd(28, Hh));
