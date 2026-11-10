@@ -429,16 +429,34 @@ a{color:inherit;text-decoration:none;}
 .letter .sign{font-family:var(--sans);font-weight:600;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-faint);text-align:right;margin-top:14px;}
   .snow{margin-top:22px;text-align:center;position:relative;cursor:pointer;}
   .snow img{display:block;width:100%;max-width:min(86%,430px);height:auto;margin:0 auto;border:none;box-shadow:none;background:#000;}
-  /* 刊头血涌：点击图片后，血液从图片底缘流出（9 股随机血流，渗尽消散） */
+  /* 刊头血涌：点击图片后，血液从图片底缘流出——血滩沿底边横向蔓延 + 9 股不规则血流 */
   .blood-pour{position:absolute;left:50%;top:100%;transform:translateX(-50%);
     width:min(86%,430px);height:0;pointer-events:none;z-index:5;}
-  .blood-pour i{position:absolute;top:-4px;display:block;
+  /* 血滩：不规则流体，沿图片底面向两侧蔓延 */
+  .blood-pour .pool{position:absolute;left:-2%;top:-9px;width:104%;height:18px;display:block;
+    transform:scaleX(0);transform-origin:left center;opacity:1;
+    animation:pool 3.2s cubic-bezier(.3,.2,.5,1) forwards;
+    background:linear-gradient(180deg,#c81527 0%,#a30e20 55%,#70101a 100%);
+    border-radius:38% 62% 55% 45%/75% 55% 95% 65%;
+    filter:drop-shadow(0 2px 8px rgba(224,16,34,.5));}
+  .blood-pour .pool::before,.blood-pour .pool::after{content:"";position:absolute;display:block;background:#b01122;}
+  .blood-pour .pool::before{left:6%;top:-5px;width:24%;height:14px;
+    border-radius:60% 40% 55% 45%/70% 85% 50% 60%;transform:rotate(-2deg);}
+  .blood-pour .pool::after{left:55%;top:-3px;width:34%;height:16px;
+    border-radius:45% 55% 40% 60%/85% 55% 75% 50%;transform:rotate(1.5deg);}
+  @keyframes pool{0%{transform:scaleX(0)}55%{opacity:1}100%{transform:scaleX(1);opacity:0}}
+  /* 血流：不规则流体柱（随机歪斜圆角 + 顶端鼓包 + 底端滴头） */
+  .blood-pour i{position:absolute;top:-6px;display:block;
     background:linear-gradient(180deg,#c01126 0%,#8c0d1a 70%,#6e0a14 100%);
-    border-radius:0 0 7px 7px;transform-origin:top center;transform:scaleY(0);opacity:1;
+    border-radius:35% 65% 55% 45%/40% 30% 70% 55%;
+    transform-origin:top center;transform:scaleY(0);opacity:1;
     animation:pour 3.2s cubic-bezier(.4,.1,.6,1) forwards;
     filter:drop-shadow(0 0 7px rgba(224,16,34,.55));}
-  .blood-pour i::after{content:"";position:absolute;left:50%;bottom:-6px;width:140%;padding-top:100%;
-    transform:translateX(-50%);border-radius:50%;
+  .blood-pour i::before{content:"";position:absolute;left:50%;top:-7px;width:175%;padding-top:115%;
+    transform:translateX(-50%);border-radius:55% 45% 60% 50%/60% 70% 45% 65%;
+    background:radial-gradient(circle,#c01126 0%,#930e1e 60%,transparent 75%);}
+  .blood-pour i::after{content:"";position:absolute;left:50%;bottom:-6px;width:150%;padding-top:110%;
+    transform:translateX(-50%);border-radius:55% 45% 60% 50%/60% 70% 45% 65%;
     background:radial-gradient(circle,#c01126 0%,#8c0d1a 55%,transparent 72%);}
   @keyframes pour{0%{transform:scaleY(0);opacity:1}58%{opacity:1}100%{transform:scaleY(1);opacity:0}}
   .blood-pour.out{animation:bloodfade .9s ease forwards;}
