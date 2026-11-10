@@ -247,7 +247,7 @@
     e.preventDefault();
     if(box.querySelector('.blood-pour')) return;      // 正在流血时不重复触发
     var NS = 'http://www.w3.org/2000/svg';
-    var W = img.clientWidth || 380, Hh = 300;
+    var W = img.clientWidth || 380, Hh = 190;
     function rnd(a,b){ return a + Math.random()*(b-a); }
     var svg = document.createElementNS(NS,'svg');
     svg.setAttribute('viewBox','0 0 '+W+' '+Hh);
@@ -279,7 +279,7 @@
 
     // —— 垂流：粗细长短不一的细长血柱，部分底端带脱离的血珠 ——
     for(var i=0;i<14;i++){
-      var dx0 = rnd(6, W-6), len = rnd(50, 225), wdt = rnd(2.5, 10);
+      var dx0 = rnd(6, W-6), len = rnd(32, 120), wdt = rnd(2.5, 10);
       var d = 'M'+(dx0-wdt/2)+',22 L'+(dx0+wdt/2)+',22'+
               ' L'+(dx0+wdt*0.32)+','+(22+len-10)+
               ' Q'+dx0+','+(22+len+9)+' '+(dx0-wdt*0.32)+','+(22+len-10)+' Z';
@@ -311,8 +311,8 @@
     p.className = 'blood-pour';
     p.appendChild(svg);
     box.appendChild(p);
-    setTimeout(function(){ p.classList.add('out'); }, 3400);   // 流尽后渗散
-    setTimeout(function(){ if(p.parentNode) p.parentNode.removeChild(p); }, 4800);
+    setTimeout(function(){ p.classList.add('out'); }, 3000);   // 流尽后渗散
+    setTimeout(function(){ if(p.parentNode) p.parentNode.removeChild(p); }, 4200);
   });
 })();
 </script>
