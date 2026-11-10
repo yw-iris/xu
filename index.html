@@ -278,7 +278,7 @@
     g.appendChild(mass);
 
     // —— 垂流：粗细长短不一的细长血柱，部分底端带脱离的血珠 ——
-    for(var i=0;i<8;i++){
+    for(var i=0;i<5;i++){
       var dx0 = rnd(6, W-6), len = rnd(20, 78), wdt = rnd(2.5, 10);
       var d = 'M'+(dx0-wdt/2)+',22 L'+(dx0+wdt/2)+',22'+
               ' L'+(dx0+wdt*0.32)+','+(22+len-10)+
@@ -297,7 +297,7 @@
     }
 
     // —— 溅点：散落的细小血滴 ——
-    for(var j=0;j<13;j++){
+    for(var j=0;j<8;j++){
       var c2 = document.createElementNS(NS,'circle');
       c2.setAttribute('cx', rnd(0, W));
       c2.setAttribute('cy', rnd(28, Hh));
