@@ -427,18 +427,8 @@ a{color:inherit;text-decoration:none;}
 .letter .for{font-family:var(--serif);font-size:15px;color:var(--ink-dim);letter-spacing:.06em;}
 .letter .atonement-q{font-size:clamp(15px,4.2vw,19px);color:var(--ink);text-align:right;margin-top:6px;}
 .letter .sign{font-family:var(--sans);font-weight:600;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-faint);text-align:right;margin-top:14px;}
-  .snow{margin-top:22px;text-align:center;position:relative;cursor:pointer;}
+  .snow{margin-top:22px;text-align:center;position:relative;}
   .snow img{display:block;width:100%;max-width:min(86%,430px);height:auto;margin:0 auto;border:none;box-shadow:none;background:#000;}
-  /* 刊头血涌：点击图片后，血液从图片底缘流出（SVG 随机血迹：血毯+垂流+血珠+溅点），
-     整体从上往下生长（scaleY 顶点起笔），流尽后渗散 */
-  .blood-pour{position:absolute;left:50%;top:100%;transform:translateX(-50%);
-    width:min(86%,430px);height:auto;pointer-events:none;z-index:5;}
-  .blood-svg{display:block;width:100%;height:auto;transform-origin:top center;transform:scaleY(0);
-    animation:pourdown 2.2s cubic-bezier(.3,.2,.5,1) forwards;
-    filter:drop-shadow(0 3px 10px rgba(224,16,34,.45));}
-  @keyframes pourdown{0%{transform:scaleY(0)}100%{transform:scaleY(1)}}
-  .blood-pour.out{animation:bloodfade .9s ease forwards;}
-  @keyframes bloodfade{to{opacity:0}}
 
 /* ---- 信徒档案 (profile) ---- */
 .profile{position:relative;z-index:3;margin-top:38px;}
