@@ -248,12 +248,16 @@
     if(box.querySelector('.blood-pour')) return;      // 正在流血时不重复触发
     var p = document.createElement('div');
     p.className = 'blood-pour';
+    var pool = document.createElement('span');       // 血滩：沿图片底边横向蔓延
+    pool.className = 'pool';
+    p.appendChild(pool);
     for(var i=0;i<9;i++){                             // 9 股粗细/位置/快慢随机的血流
       var s = document.createElement('i');
       s.style.left = (4 + Math.random()*88) + '%';
       s.style.width = (5 + Math.random()*10) + 'px';
       s.style.height = (35 + Math.random()*115) + 'px';
       s.style.animationDelay = (Math.random()*0.35) + 's';
+      s.style.rotate = (Math.random()*5 - 2.5) + 'deg';   // 轻微歪斜 → 不规则流体感
       p.appendChild(s);
     }
     box.appendChild(p);
